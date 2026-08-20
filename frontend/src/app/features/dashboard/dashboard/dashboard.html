@@ -1,0 +1,66 @@
+<div class="dashboard-page">
+  <header class="dashboard-header">
+    <div>
+      <h1>Dashboard</h1>
+      <p>Your fitness overview</p>
+    </div>
+  </header>
+
+  @if (isLoading()) {
+    <div class="state-message">
+      Loading dashboard...
+    </div>
+  }
+
+  @if (errorMessage()) {
+    <div class="state-message error">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  @if (dashboard() && !isLoading()) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span class="card-label">Current Weight</span>
+        <strong>{{ dashboard()?.current_weight ?? '—' }}</strong>
+        <span class="card-unit">
+          {{ dashboard()?.current_weight !== null ? 'kg' : '' }}
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <span class="card-label">Latest Calories</span>
+        <strong>{{ dashboard()?.latest_calories ?? '—' }}</strong>
+        <span class="card-unit">
+          {{ dashboard()?.latest_calories !== null ? 'kcal' : '' }}
+        </span>
+      </article>
+
+      <article class="summary-card">
+        <span class="card-label">Total Workouts</span>
+        <strong>{{ dashboard()?.total_workouts }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="card-label">Today's Workouts</span>
+        <strong>{{ dashboard()?.today_workouts }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="card-label">Latest Prediction</span>
+        <strong>{{ dashboard()?.latest_prediction ?? '—' }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span class="card-label">Prediction Confidence</span>
+        <strong>
+          {{
+            dashboard()?.prediction_confidence !== null
+              ? (dashboard()!.prediction_confidence! * 100) + '%'
+              : '—'
+          }}
+        </strong>
+      </article>
+    </section>
+  }
+</div>
