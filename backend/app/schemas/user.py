@@ -29,3 +29,12 @@ class UserResponse(BaseModel):
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class UserUpdate(BaseModel):
+    name: str
+    age: int
+    gender: str
+    height_cm: float
+    weight_kg: float
+    activity_level: str
+    goal: str
