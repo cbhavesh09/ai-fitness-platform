@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-
+import { Workouts } from './features/workouts/workouts/workouts';
 import { Login } from './features/auth/login/login';
 import { Dashboard } from './features/dashboard/dashboard/dashboard';
 import { authGuard } from './core/guards/auth-guard';
@@ -19,4 +19,9 @@ export const routes: Routes = [
     redirectTo: 'login',
     pathMatch: 'full',
   },
+{
+  path: 'workouts',
+  component: Workouts,
+  canActivate: [authGuard],
+},
 ];

@@ -1,0 +1,164 @@
+<div class="workouts-page">
+  <header class="page-header">
+    <div>
+      <h1>Workouts</h1>
+      <p>Track your training activity.</p>
+    </div>
+  </header>
+
+  @if (summary(); as workoutSummary) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Total Workouts</span>
+        <strong>{{ workoutSummary.total_workouts }}</strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Today's Workouts</span>
+        <strong>{{ workoutSummary.today_workouts }}</strong>
+      </article>
+    </section>
+  }
+
+  <section class="workout-form-card">
+    <h2>Add Workout</h2>
+
+    <form (ngSubmit)="addWorkout()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="exercise">Exercise</label>
+          <input
+            id="exercise"
+            name="exercise"
+            type="text"
+            [(ngModel)]="exercise"
+            placeholder="e.g. Bench Press"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="muscleGroup">Muscle Group</label>
+          <input
+            id="muscleGroup"
+            name="muscleGroup"
+            type="text"
+            [(ngModel)]="muscleGroup"
+            placeholder="e.g. Chest"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="sets">Sets</label>
+          <input
+            id="sets"
+            name="sets"
+            type="number"
+            min="1"
+            [(ngModel)]="sets"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reps">Reps</label>
+          <input
+            id="reps"
+            name="reps"
+            type="number"
+            min="1"
+            [(ngModel)]="reps"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="weight">Weight (kg)</label>
+          <input
+            id="weight"
+            name="weight"
+            type="number"
+            min="0"
+            step="0.5"
+            [(ngModel)]="weight"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="duration">Duration (minutes)</label>
+          <input
+            id="duration"
+            name="duration"
+            type="number"
+            min="0"
+            [(ngModel)]="duration"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            [(ngModel)]="date"
+          />
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="error-message">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <button type="submit" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Add Workout' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="history-section">
+    <div class="section-header">
+      <h2>Workout History</h2>
+    </div>
+
+    @if (isLoading()) {
+      <div class="state-message">
+        Loading workouts...
+      </div>
+    }
+
+    @if (!isLoading() && workouts().length === 0) {
+      <div class="state-message">
+        No workouts recorded yet.
+      </div>
+    }
+
+    @if (!isLoading() && workouts().length > 0) {
+      <div class="workout-list">
+        @for (workout of workouts(); track workout.id) {
+          <article class="workout-card">
+            <div>
+              <h3>{{ workout.exercise }}</h3>
+              <p>{{ workout.muscle_group }}</p>
+            </div>
+
+            <div class="workout-details">
+              <span>{{ workout.sets }} sets</span>
+              <span>{{ workout.reps }} reps</span>
+              <span>{{ workout.weight }} kg</span>
+              <span>{{ workout.duration }} min</span>
+              <span>{{ workout.date }}</span>
+            </div>
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteWorkout(workout.id)"
+            >
+              Delete
+            </button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
