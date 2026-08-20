@@ -103,3 +103,30 @@ async def get_predictions(
         )
 
     return predictions
+
+@router.delete(
+    "/{prediction_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+async def delete_prediction(
+    prediction_id: str,
+    user_id: str = Depends(get_current_user),
+):
+    if not ObjectId.is_valid(prediction_id):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prediction not found",
+        )
+
+    result = await database.predictions.delete_one(
+        {
+            "_id": ObjectId(prediction_id),
+            "user_id": user_id,
+        }
+    )
+
+    if result.deleted_count == 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Prediction not found",
+        )
