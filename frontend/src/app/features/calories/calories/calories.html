@@ -1,0 +1,113 @@
+<div class="calories-page">
+  <header class="page-header">
+    <div>
+      <h1>Calorie Tracking</h1>
+      <p>Track your daily calorie intake.</p>
+    </div>
+  </header>
+
+  @if (summary(); as calorieSummary) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Latest Calories</span>
+        <strong>
+          {{
+            calorieSummary.latest_calories !== null
+              ? calorieSummary.latest_calories + ' kcal'
+              : '—'
+          }}
+        </strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Total Calories</span>
+        <strong>
+          {{
+            calorieSummary.total_calories !== null
+              ? calorieSummary.total_calories + ' kcal'
+              : '—'
+          }}
+        </strong>
+      </article>
+    </section>
+  }
+
+  <section class="calorie-form-card">
+    <h2>Add Calories</h2>
+
+    <form (ngSubmit)="addCalories()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="calories">Calories (kcal)</label>
+          <input
+            id="calories"
+            name="calories"
+            type="number"
+            min="1"
+            step="1"
+            [(ngModel)]="calories"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            [(ngModel)]="date"
+          />
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="error-message">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <button type="submit" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Add Calories' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="history-section">
+    <div class="section-header">
+      <h2>Calorie History</h2>
+    </div>
+
+    @if (isLoading()) {
+      <div class="state-message">
+        Loading calorie history...
+      </div>
+    }
+
+    @if (!isLoading() && calorieLogs().length === 0) {
+      <div class="state-message">
+        No calorie entries recorded yet.
+      </div>
+    }
+
+    @if (!isLoading() && calorieLogs().length > 0) {
+      <div class="calorie-list">
+        @for (calorieLog of calorieLogs(); track calorieLog.id) {
+          <article class="calorie-card">
+            <div>
+              <strong>{{ calorieLog.calories }} kcal</strong>
+              <span>{{ calorieLog.date }}</span>
+            </div>
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteCalories(calorieLog.id)"
+            >
+              Delete
+            </button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
