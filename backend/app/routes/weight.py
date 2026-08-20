@@ -6,6 +6,7 @@ from bson import ObjectId
 from backend.app.auth.dependencies import get_current_user
 from backend.app.db.client import database
 from backend.app.schemas.weight_log import WeightLogCreate, WeightLogResponse
+from backend.app.schemas.weight_summary import WeightSummary
 
 
 router = APIRouter(
@@ -68,6 +69,39 @@ async def get_weight_logs(
         )
 
     return weight_logs
+@router.get(
+    "/summary",
+    response_model=WeightSummary,
+)
+
+async def get_weight_summary(
+    user_id: str = Depends(get_current_user),
+):
+    latest_weight = await database.weight_logs.find_one(
+        {"user_id": user_id},
+        sort=[("date", -1)],
+    )
+
+    earliest_weight = await database.weight_logs.find_one(
+        {"user_id": user_id},
+        sort=[("date", 1)],
+    )
+
+    if latest_weight is None or earliest_weight is None:
+        return WeightSummary(
+            current_weight=None,
+            starting_weight=None,
+            weight_change=None,
+        )
+
+    current_weight = latest_weight["weight"]
+    starting_weight = earliest_weight["weight"]
+
+    return WeightSummary(
+        current_weight=current_weight,
+        starting_weight=starting_weight,
+        weight_change=current_weight - starting_weight,
+    )
 
 @router.delete(
     "/{weight_id}",
