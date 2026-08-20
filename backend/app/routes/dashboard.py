@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime, time, timezone
 
 from fastapi import APIRouter, Depends
 
@@ -34,6 +34,28 @@ async def get_dashboard(
         {"user_id": user_id}
     )
 
+    today = date.today()
+    start_of_day = datetime.combine(
+        today,
+        time.min,
+        tzinfo=timezone.utc,
+    )
+    end_of_day = datetime.combine(
+    today,
+    time.max,
+    tzinfo=timezone.utc,
+)
+    today_workouts = await database.workouts.count_documents(
+    {
+        "user_id": user_id,
+        "date": {
+            "$gte": start_of_day,
+            "$lte": end_of_day,
+        },
+    }
+)
+
+
     latest_prediction = await database.predictions.find_one(
         {"user_id": user_id},
         sort=[("created_at", -1)],
@@ -51,6 +73,7 @@ async def get_dashboard(
             else None
         ),
         total_workouts=total_workouts,
+        today_workouts=today_workouts,
         latest_prediction=(
             latest_prediction["prediction"]
             if latest_prediction
