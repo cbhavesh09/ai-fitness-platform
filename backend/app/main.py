@@ -12,6 +12,7 @@ from backend.app.routes.weight import router as weight_router
 from backend.app.routes.calorie import router as calorie_router
 from backend.app.routes.prediction import router as prediction_router
 from backend.app.routes.users import router as users_router
+from backend.app.routes.dashboard import router as dashboard_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +29,7 @@ app.include_router(weight_router)
 app.include_router(calorie_router)
 app.include_router(prediction_router)
 app.include_router(users_router)
+app.include_router(dashboard_router)
 
 @app.get("/")
 def root():
