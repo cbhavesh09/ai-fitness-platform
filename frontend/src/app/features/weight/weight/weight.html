@@ -1,0 +1,133 @@
+<div class="weight-page">
+  <header class="page-header">
+    <div>
+      <h1>Weight Tracking</h1>
+      <p>Track your weight and monitor your progress.</p>
+    </div>
+  </header>
+
+  @if (summary(); as weightSummary) {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span>Current Weight</span>
+        <strong>
+          {{
+            weightSummary.current_weight !== null
+              ? weightSummary.current_weight + ' kg'
+              : '—'
+          }}
+        </strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Starting Weight</span>
+        <strong>
+          {{
+            weightSummary.starting_weight !== null
+              ? weightSummary.starting_weight + ' kg'
+              : '—'
+          }}
+        </strong>
+      </article>
+
+      <article class="summary-card">
+        <span>Weight Change</span>
+        <strong
+          [class.positive]="
+            weightSummary.weight_change !== null &&
+            weightSummary.weight_change < 0
+          "
+          [class.negative]="
+            weightSummary.weight_change !== null &&
+            weightSummary.weight_change > 0
+          "
+        >
+          {{
+            weightSummary.weight_change !== null
+              ? weightSummary.weight_change + ' kg'
+              : '—'
+          }}
+        </strong>
+      </article>
+    </section>
+  }
+
+  <section class="weight-form-card">
+    <h2>Add Weight</h2>
+
+    <form (ngSubmit)="addWeight()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="weight">Weight (kg)</label>
+          <input
+            id="weight"
+            name="weight"
+            type="number"
+            min="0.1"
+            step="0.1"
+            [(ngModel)]="weight"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="date">Date</label>
+          <input
+            id="date"
+            name="date"
+            type="date"
+            [(ngModel)]="date"
+          />
+        </div>
+      </div>
+
+      @if (errorMessage()) {
+        <p class="error-message">
+          {{ errorMessage() }}
+        </p>
+      }
+
+      <button type="submit" [disabled]="isSaving">
+        {{ isSaving ? 'Saving...' : 'Add Weight' }}
+      </button>
+    </form>
+  </section>
+
+  <section class="history-section">
+    <div class="section-header">
+      <h2>Weight History</h2>
+    </div>
+
+    @if (isLoading()) {
+      <div class="state-message">
+        Loading weight history...
+      </div>
+    }
+
+    @if (!isLoading() && weightLogs().length === 0) {
+      <div class="state-message">
+        No weight entries recorded yet.
+      </div>
+    }
+
+    @if (!isLoading() && weightLogs().length > 0) {
+      <div class="weight-list">
+        @for (weightLog of weightLogs(); track weightLog.id) {
+          <article class="weight-card">
+            <div>
+              <strong>{{ weightLog.weight }} kg</strong>
+              <span>{{ weightLog.date }}</span>
+            </div>
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deleteWeight(weightLog.id)"
+            >
+              Delete
+            </button>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
