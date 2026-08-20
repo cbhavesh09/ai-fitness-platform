@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from datetime import datetime
+from datetime import date, datetime, time, timezone
 from backend.app.auth.dependencies import get_current_user
 from backend.app.db.client import database
 from backend.app.models.workout import Workout
 from backend.app.schemas.workout import WorkoutCreate, WorkoutResponse
+from backend.app.schemas.workout_summary import WorkoutSummary
 
 router = APIRouter(prefix="/workouts", tags=["Workouts"])
 
@@ -80,6 +81,47 @@ async def get_workouts(
         )
 
     return workouts
+
+@router.get(
+    "/summary",
+    response_model=WorkoutSummary,
+)
+async def get_workout_summary(
+    user_id: str = Depends(get_current_user),
+):
+    total_workouts = await database.workouts.count_documents(
+        {"user_id": user_id}
+    )
+
+    today = date.today()
+
+    start_of_day = datetime.combine(
+        today,
+        time.min,
+        tzinfo=timezone.utc,
+    )
+
+    end_of_day = datetime.combine(
+        today,
+        time.max,
+        tzinfo=timezone.utc,
+    )
+
+    today_workouts = await database.workouts.count_documents(
+        {
+            "user_id": user_id,
+            "date": {
+                "$gte": start_of_day,
+                "$lte": end_of_day,
+            },
+        }
+    )
+
+    return WorkoutSummary(
+        total_workouts=total_workouts,
+        today_workouts=today_workouts,
+    )
+
 
 from bson import ObjectId
 
