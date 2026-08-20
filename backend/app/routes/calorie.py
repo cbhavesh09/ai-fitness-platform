@@ -9,6 +9,7 @@ from backend.app.schemas.calorie_log import (
     CalorieLogCreate,
     CalorieLogResponse,
 )
+from backend.app.schemas.calorie_summary import CalorieSummary
 
 
 router = APIRouter(
@@ -71,6 +72,47 @@ async def get_calorie_logs(
         )
 
     return calorie_logs
+
+@router.get(
+    "/summary",
+    response_model=CalorieSummary,
+)
+async def get_calorie_summary(
+    user_id: str = Depends(get_current_user),
+):
+    latest_calorie = await database.calorie_logs.find_one(
+        {"user_id": user_id},
+        sort=[("date", -1)],
+    )
+
+    pipeline = [
+        {"$match": {"user_id": user_id}},
+        {
+            "$group": {
+                "_id": None,
+                "total_calories": {"$sum": "$calories"},
+            }
+        },
+    ]
+
+    cursor = await database.calorie_logs.aggregate(pipeline)
+
+    total_result = await cursor.to_list(length=1)
+
+    total_calories = (
+        total_result[0]["total_calories"]
+        if total_result
+        else 0
+    )
+
+    return CalorieSummary(
+        latest_calories=(
+            latest_calorie["calories"]
+            if latest_calorie
+            else None
+        ),
+        total_calories=total_calories,
+    )
 
 @router.delete(
     "/{calorie_id}",
