@@ -7,6 +7,7 @@ from backend.app.routes.auth import router as auth_router
 from backend.app.auth.jwt import create_access_token
 from backend.app.auth.password import hash_password, verify_password
 from backend.app.schemas.user import UserCreate, UserLogin, UserResponse
+from backend.app.routes.workouts import router as workout_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await client.admin.command("ping")
@@ -16,6 +17,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router)
+app.include_router(workout_router)
 @app.get("/")
 def root():
     return {"message":"API is running for the FastAPI application."}
