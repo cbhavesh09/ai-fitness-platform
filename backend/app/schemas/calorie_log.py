@@ -1,10 +1,10 @@
 from datetime import date
 
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 
 
 class CalorieLogCreate(BaseModel):
-    calories: float
+    calories: float = Field(..., gt=0)
     date: date
 
 

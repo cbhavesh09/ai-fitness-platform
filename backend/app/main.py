@@ -9,6 +9,7 @@ from backend.app.auth.password import hash_password, verify_password
 from backend.app.schemas.user import UserCreate, UserLogin, UserResponse
 from backend.app.routes.workouts import router as workout_router
 from backend.app.routes.weight import router as weight_router
+from backend.app.routes.calorie import router as calorie_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(auth_router)
 app.include_router(workout_router)
 app.include_router(weight_router)
+app.include_router(calorie_router)
 
 @app.get("/")
 def root():
