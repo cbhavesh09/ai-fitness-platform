@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from backend.app.db.client import client
 from fastapi import Depends
@@ -22,6 +23,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:4200",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(auth_router)
 app.include_router(workout_router)
