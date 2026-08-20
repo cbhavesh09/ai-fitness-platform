@@ -1,9 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import {
   DashboardService,
   DashboardSummary,
 } from '../../../core/services/dashboard.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,6 +15,8 @@ import {
 })
 export class Dashboard implements OnInit {
   private readonly dashboardService = inject(DashboardService);
+  private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   readonly dashboard = signal<DashboardSummary | null>(null);
   readonly isLoading = signal(true);
@@ -22,20 +26,21 @@ export class Dashboard implements OnInit {
     this.loadDashboard();
   }
 
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
   private loadDashboard(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
     this.dashboardService.getDashboard().subscribe({
       next: (data) => {
-        console.log('DASHBOARD RESPONSE:', data);
-
         this.dashboard.set(data);
         this.isLoading.set(false);
       },
       error: (error) => {
-        console.error('DASHBOARD ERROR:', error);
-
         this.isLoading.set(false);
 
         if (error.status === 401) {
