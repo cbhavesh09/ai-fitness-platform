@@ -76,3 +76,30 @@ async def create_calorie_burn_prediction(
         confidence=prediction.confidence,
         created_at=prediction.created_at,
     )
+
+@router.get(
+    "",
+    response_model=list[PredictionResponse],
+)
+async def get_predictions(
+    user_id: str = Depends(get_current_user),
+):
+    predictions = []
+
+    cursor = database.predictions.find(
+        {"user_id": user_id}
+    ).sort("created_at", -1)
+
+    async for prediction in cursor:
+        predictions.append(
+            PredictionResponse(
+                id=str(prediction["_id"]),
+                user_id=prediction["user_id"],
+                prediction_type=prediction["prediction_type"],
+                prediction=prediction["prediction"],
+                confidence=prediction["confidence"],
+                created_at=prediction["created_at"],
+            )
+        )
+
+    return predictions
