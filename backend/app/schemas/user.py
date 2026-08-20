@@ -25,3 +25,7 @@ class UserResponse(BaseModel):
     activity_level: str
     goal: str
     created_at: datetime
+
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
