@@ -1,20 +1,16 @@
 from contextlib import asynccontextmanager
+from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import FastAPI
-from backend.app.db.client import client
-from fastapi import Depends
 from backend.app.auth.dependencies import get_current_user
+from backend.app.db.client import client
 from backend.app.routes.auth import router as auth_router
-from backend.app.auth.jwt import create_access_token
-from backend.app.auth.password import hash_password, verify_password
-from backend.app.schemas.user import UserCreate, UserLogin, UserResponse
-from backend.app.routes.workouts import router as workout_router
-from backend.app.routes.weight import router as weight_router
 from backend.app.routes.calorie import router as calorie_router
+from backend.app.routes.dashboard import router as dashboard_router
 from backend.app.routes.prediction import router as prediction_router
 from backend.app.routes.users import router as users_router
-from backend.app.routes.dashboard import router as dashboard_router
-
+from backend.app.routes.weight import router as weight_router
+from backend.app.routes.workouts import router as workout_router
+from backend.app.config import settings
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await client.admin.command("ping")
@@ -27,12 +23,8 @@ app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:4200",
-    ],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+        settings.frontend_url,
+    ]),
 
 app.include_router(auth_router)
 app.include_router(workout_router)
