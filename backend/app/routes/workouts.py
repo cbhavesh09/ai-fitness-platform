@@ -5,6 +5,9 @@ from backend.app.db.client import database
 from backend.app.models.workout import Workout
 from backend.app.schemas.workout import WorkoutCreate, WorkoutResponse
 from backend.app.schemas.workout_summary import WorkoutSummary
+from backend.app.services.workout_prediction import (
+    recommend_workout_weight,
+)
 
 router = APIRouter(prefix="/workouts", tags=["Workouts"])
 
@@ -124,6 +127,28 @@ async def get_workout_summary(
 
 
 from bson import ObjectId
+
+@router.get(
+    "/recommendation/{exercise_name}",
+)
+async def get_workout_recommendation(
+    exercise_name: str,
+    user_id: str = Depends(get_current_user),
+):
+    try:
+        return recommend_workout_weight(exercise_name)
+
+    except ValueError as error:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(error),
+        )
+
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Unable to generate workout recommendation.",
+        )
 
 @router.delete(
     "/{workout_id}",

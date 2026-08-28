@@ -1,49 +1,137 @@
 <div class="login-page">
-  <div class="login-card">
-    <div class="login-header">
-      <h1>AI Fitness</h1>
-      <p>Sign in to your account</p>
+
+  <section class="login-brand-panel">
+
+    <div class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+        <path d="M10 39L18 23L26 43L34 19L42 39L54 25" fill="none" stroke="currentColor" stroke-width="6"
+          stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
     </div>
 
-    <form (ngSubmit)="onSubmit()">
-      <div class="form-group">
-        <label for="email">Email</label>
+    <div class="brand-content">
 
-        <input
-          id="email"
-          name="email"
-          type="email"
-          [(ngModel)]="email"
-          placeholder="Enter your email"
-          autocomplete="email"
-        />
+      <span class="brand-eyebrow">
+        AI FITNESS
+      </span>
+
+      <h1>
+        Train with<br />
+        <em>intelligence.</em>
+      </h1>
+
+      <p>
+        Turn your training history into smarter decisions,
+        measurable progress, and better performance.
+      </p>
+
+    </div>
+
+    <div class="brand-footer">
+      <span>PERFORMANCE LAB</span>
+      <span>AI-POWERED TRAINING</span>
+    </div>
+
+  </section>
+
+
+  <section class="login-form-panel">
+
+    <div class="login-container">
+
+      <div class="mobile-brand">
+        <div class="mobile-brand-icon">
+          <svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M10 39L18 23L26 43L34 19L42 39L54 25" fill="none" stroke="currentColor" stroke-width="6"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </div>
+
+        <div>
+          <strong>AI FITNESS</strong>
+          <span>Performance Lab</span>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label for="password">Password</label>
 
-        <input
-          id="password"
-          name="password"
-          type="password"
-          [(ngModel)]="password"
-          placeholder="Enter your password"
-          autocomplete="current-password"
-        />
+      <div class="login-header">
+
+        <span class="eyebrow">
+          MEMBER ACCESS
+        </span>
+
+        <h2>Welcome back.</h2>
+
+        <p>
+          Sign in to continue your training journey.
+        </p>
+
       </div>
 
-      @if (errorMessage) {
+
+      <form (ngSubmit)="onSubmit()">
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input id="email" name="email" type="email" [(ngModel)]="email" placeholder="you@example.com"
+            autocomplete="email" />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <div class="password-label">
+            <label for="password">
+              Password
+            </label>
+          </div>
+
+          <input id="password" name="password" type="password" [(ngModel)]="password" placeholder="Enter your password"
+            autocomplete="current-password" />
+
+        </div>
+
+
+        @if (errorMessage) {
+
         <p class="error-message">
           {{ errorMessage }}
         </p>
-      }
 
-      <button
-        type="submit"
-        [disabled]="isLoading"
-      >
-        {{ isLoading ? 'Signing in...' : 'Sign in' }}
-      </button>
-    </form>
-  </div>
+        }
+
+
+        <button type="submit" [disabled]="isLoading">
+          <span>
+            {{ isLoading ? 'Signing in...' : 'Sign in' }}
+          </span>
+
+          @if (!isLoading) {
+          <span class="button-arrow">→</span>
+          }
+        </button>
+
+      </form>
+
+      <div class="signup-link">
+        <span>Don't have an account?</span>
+
+        <a routerLink="/signup">
+          Create account
+        </a>
+      </div>
+      <div class="login-meta">
+        <span>AI FITNESS</span>
+        <span>SECURE ACCESS</span>
+      </div>
+
+    </div>
+
+  </section>
+
 </div>

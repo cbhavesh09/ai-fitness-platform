@@ -1,15 +1,6 @@
 from backend.app.models.user import User
 
-
 def calculate_calorie_burn(user: User) -> tuple[float, float]:
-    """
-    Calculate estimated daily calorie burn using the Mifflin-St Jeor
-    equation and the user's activity level.
-
-    Returns:
-        tuple[float, float]:
-            estimated calorie burn and confidence score.
-    """
 
     if user.gender.lower() == "male":
         bmr = (

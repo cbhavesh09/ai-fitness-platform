@@ -1,0 +1,301 @@
+<div class="signup-page">
+
+  <div class="signup-card">
+
+    <div class="signup-header">
+
+      <div class="brand-mark">
+        AF
+      </div>
+
+      <span class="eyebrow">
+        PERFORMANCE LAB
+      </span>
+
+      <h1>Create your account</h1>
+
+      <p>
+        Set up your fitness profile to start tracking
+        your performance.
+      </p>
+
+    </div>
+
+
+    <form (ngSubmit)="onSubmit()">
+
+      <div class="form-section">
+
+        <span class="section-label">
+          ACCOUNT
+        </span>
+
+
+        <div class="form-group">
+
+          <label for="name">
+            Full Name
+          </label>
+
+          <input
+            id="name"
+            name="name"
+            type="text"
+            [(ngModel)]="name"
+            placeholder="Enter your name"
+            autocomplete="name"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="email">
+            Email
+          </label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+          />
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="password">
+            Password
+          </label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            [(ngModel)]="password"
+            placeholder="At least 6 characters"
+            autocomplete="new-password"
+          />
+
+        </div>
+
+      </div>
+
+
+      <div class="form-section">
+
+        <span class="section-label">
+          FITNESS PROFILE
+        </span>
+
+
+        <div class="form-grid">
+
+          <div class="form-group">
+
+            <label for="age">
+              Age
+            </label>
+
+            <input
+              id="age"
+              name="age"
+              type="number"
+              min="1"
+              [(ngModel)]="age"
+              placeholder="25"
+            />
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="gender">
+              Gender
+            </label>
+
+            <select
+              id="gender"
+              name="gender"
+              [(ngModel)]="gender"
+            >
+              <option value="">
+                Select
+              </option>
+
+              <option value="male">
+                Male
+              </option>
+
+              <option value="female">
+                Female
+              </option>
+            </select>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="height">
+              Height
+            </label>
+
+            <div class="input-with-unit">
+
+              <input
+                id="height"
+                name="height"
+                type="number"
+                min="1"
+                step="0.1"
+                [(ngModel)]="height_cm"
+                placeholder="175"
+              />
+
+              <span>cm</span>
+
+            </div>
+
+          </div>
+
+
+          <div class="form-group">
+
+            <label for="weight">
+              Weight
+            </label>
+
+            <div class="input-with-unit">
+
+              <input
+                id="weight"
+                name="weight"
+                type="number"
+                min="1"
+                step="0.1"
+                [(ngModel)]="weight_kg"
+                placeholder="70"
+              />
+
+              <span>kg</span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="activity">
+            Activity Level
+          </label>
+
+          <select
+            id="activity"
+            name="activity_level"
+            [(ngModel)]="activity_level"
+          >
+            <option value="">
+              Select your activity level
+            </option>
+
+            <option value="sedentary">
+              Sedentary
+            </option>
+
+            <option value="light">
+              Lightly Active
+            </option>
+
+            <option value="moderate">
+              Moderately Active
+            </option>
+
+            <option value="active">
+              Very Active
+            </option>
+
+            <option value="very_active">
+              Extremely Active
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label for="goal">
+            Fitness Goal
+          </label>
+
+          <select
+            id="goal"
+            name="goal"
+            [(ngModel)]="goal"
+          >
+            <option value="">
+              Select your goal
+            </option>
+
+            <option value="weight_loss">
+              Weight Loss
+            </option>
+
+            <option value="maintenance">
+              Maintain Weight
+            </option>
+
+            <option value="muscle_gain">
+              Muscle Gain
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+@if (errorMessage()) {
+  <p class="error-message">
+    {{ errorMessage() }}
+  </p>
+}
+
+
+      <button
+        type="submit"
+        [disabled]="isLoading()"
+      >
+        {{ isLoading() ? 'Creating account...' : 'Create account' }}
+      </button>
+
+    </form>
+
+
+    <div class="login-link">
+
+      <span>
+        Already have an account?
+      </span>
+
+      <a routerLink="/login">
+        Sign in
+      </a>
+
+    </div>
+
+  </div>
+
+</div>

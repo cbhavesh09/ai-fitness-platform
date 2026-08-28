@@ -7,8 +7,17 @@ from backend.app.auth.dependencies import get_current_user
 from backend.app.db.client import database
 from backend.app.models.prediction import Prediction
 from backend.app.models.user import User
-from backend.app.schemas.prediction import PredictionResponse
+from backend.app.schemas.prediction import (
+    PredictionResponse,
+    WorkoutWeightPredictionRequest,
+)
 from backend.app.services.prediction import calculate_calorie_burn
+from backend.app.services.workout_prediction import (
+    get_supported_exercises,
+)
+from backend.app.services.workout_prediction import (
+    recommend_workout_weight,
+)
 
 
 router = APIRouter(
@@ -53,7 +62,30 @@ async def create_calorie_burn_prediction(
         goal=user_document["goal"],
         created_at=user_document["created_at"],
     )
+    workout_count = await database.workouts.count_documents(
+        {"user_id": user_id}
+    )
 
+    weight_count = await database.weight_logs.count_documents(
+        {"user_id": user_id}
+    )
+
+    calorie_count = await database.calorie_logs.count_documents(
+        {"user_id": user_id}
+    )
+
+    if (
+        workout_count == 0
+        and weight_count == 0
+        and calorie_count == 0
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                "Not enough fitness data to generate a "
+                "calorie-burn prediction."
+            ),
+        )
     calorie_burn, confidence = calculate_calorie_burn(user)
 
     prediction = Prediction(
@@ -76,6 +108,27 @@ async def create_calorie_burn_prediction(
         confidence=prediction.confidence,
         created_at=prediction.created_at,
     )
+
+@router.post(
+    "/workout-weight",
+)
+async def create_workout_weight_prediction(
+    request: WorkoutWeightPredictionRequest,
+    user_id: str = Depends(get_current_user),
+):
+    try:
+        result = recommend_workout_weight(
+            request.exercise_name
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+    return result
+
 
 @router.get(
     "",
@@ -103,6 +156,16 @@ async def get_predictions(
         )
 
     return predictions
+
+@router.get(
+    "/workout-exercises",
+)
+async def get_workout_exercises(
+    user_id: str = Depends(get_current_user),
+):
+    return {
+        "exercises": get_supported_exercises()
+    }
 
 @router.delete(
     "/{prediction_id}",

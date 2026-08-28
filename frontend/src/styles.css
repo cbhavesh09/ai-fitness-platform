@@ -2,10 +2,14 @@
   box-sizing: border-box;
 }
 
-html,
+html {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  min-height: 100%;
+  min-height: 100vh;
+
   font-family:
     Inter,
     -apple-system,
@@ -13,8 +17,30 @@ body {
     "Segoe UI",
     Roboto,
     sans-serif;
+
+  background: #f5f7fb;
+  color: #111827;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  background: #f5f7fb;
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: #dbeafe;
+  color: #1e3a8a;
 }

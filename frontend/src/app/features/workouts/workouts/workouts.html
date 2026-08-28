@@ -1,164 +1,554 @@
 <div class="workouts-page">
+
   <header class="page-header">
-    <div>
-      <h1>Workouts</h1>
-      <p>Track your training activity.</p>
-    </div>
+    <div class="header-copy">
+      <span class="eyebrow">TRAINING LOG</span>
+
+
+  <h1>Workouts</h1>
+
+  <p>
+    Build consistency. Track every session.
+    Keep getting stronger.
+  </p>
+</div>
+
+<div class="header-mark">
+  <span>01</span>
+  <small>TRAIN</small>
+</div>
+
+
   </header>
 
-  @if (summary(); as workoutSummary) {
-    <section class="summary-grid">
-      <article class="summary-card">
-        <span>Total Workouts</span>
-        <strong>{{ workoutSummary.total_workouts }}</strong>
-      </article>
+@if (summary(); as workoutSummary) {
 
-      <article class="summary-card">
-        <span>Today's Workouts</span>
-        <strong>{{ workoutSummary.today_workouts }}</strong>
-      </article>
-    </section>
-  }
+
+<section class="summary-grid">
+
+  <article class="summary-card primary-card">
+
+    <div class="summary-top">
+      <span class="summary-number">01</span>
+      <span class="summary-tag">TOTAL</span>
+    </div>
+
+    <div class="summary-content">
+
+      <span class="card-label">
+        Total Workouts
+      </span>
+
+      <strong>
+        {{ workoutSummary.total_workouts }}
+      </strong>
+
+      <p>
+        Sessions recorded
+      </p>
+
+    </div>
+
+  </article>
+
+
+  <article class="summary-card">
+
+    <div class="summary-top">
+      <span class="summary-number">02</span>
+      <span class="summary-tag">TODAY</span>
+    </div>
+
+    <div class="summary-content">
+
+      <span class="card-label">
+        Today's Workouts
+      </span>
+
+      <strong>
+        {{ workoutSummary.today_workouts }}
+      </strong>
+
+      <p>
+        Sessions completed today
+      </p>
+
+    </div>
+
+  </article>
+
+</section>
+
+
+}
 
   <section class="workout-form-card">
-    <h2>Add Workout</h2>
 
-    <form (ngSubmit)="addWorkout()">
-      <div class="form-grid">
-        <div class="form-group">
-          <label for="exercise">Exercise</label>
-          <input
-            id="exercise"
-            name="exercise"
-            type="text"
-            [(ngModel)]="exercise"
-            placeholder="e.g. Bench Press"
-          />
+
+<div class="section-heading">
+
+  <div>
+
+    <span class="eyebrow">NEW SESSION</span>
+
+    <h2>Log a Workout</h2>
+
+    <p>
+      Record the details of your latest training session.
+    </p>
+
+  </div>
+
+  <div class="form-badge">
+    TRAINING
+  </div>
+
+</div>
+
+
+<form (ngSubmit)="addWorkout()">
+
+  <div class="form-grid">
+
+    <div class="form-group form-group-wide">
+
+      <label for="exercise">
+        Exercise
+      </label>
+
+      <input
+        id="exercise"
+        name="exercise"
+        type="text"
+        [(ngModel)]="exercise"
+        (blur)="loadRecommendation()"
+        placeholder="e.g. Bench Press"
+      />
+
+    </div>
+
+
+    <!-- AI recommendation moved here, immediately after Exercise -->
+
+    @if (recommendationLoading()) {
+      <div class="recommendation-card recommendation-loading form-recommendation">
+
+        <div class="recommendation-header">
+          <div>
+            <span class="eyebrow">AI RECOMMENDATION</span>
+
+            <h3>
+              Analyzing your training...
+            </h3>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="muscleGroup">Muscle Group</label>
-          <input
-            id="muscleGroup"
-            name="muscleGroup"
-            type="text"
-            [(ngModel)]="muscleGroup"
-            placeholder="e.g. Chest"
-          />
+        <p>
+          Looking at your recent performance to recommend your next working weight.
+        </p>
+
+      </div>
+    }
+
+
+    @if (recommendation(); as aiRecommendation) {
+      <div class="recommendation-card form-recommendation">
+
+        <div class="recommendation-header">
+
+          <div>
+            <span class="eyebrow">AI RECOMMENDATION</span>
+
+            <h3>
+              {{ aiRecommendation.exercise }}
+            </h3>
+          </div>
+
+          <span class="confidence-badge">
+            {{ aiRecommendation.confidence * 100 }}% CONFIDENCE
+          </span>
+
         </div>
 
-        <div class="form-group">
-          <label for="sets">Sets</label>
-          <input
-            id="sets"
-            name="sets"
-            type="number"
-            min="1"
-            [(ngModel)]="sets"
-          />
+
+        <div class="recommended-weight">
+
+          <span>NEXT SESSION</span>
+
+          <strong>
+            {{ aiRecommendation.recommended_weight }} kg
+          </strong>
+
         </div>
 
-        <div class="form-group">
-          <label for="reps">Reps</label>
-          <input
-            id="reps"
-            name="reps"
-            type="number"
-            min="1"
-            [(ngModel)]="reps"
-          />
+
+        <div class="recommendation-stats">
+
+          <div>
+            <span>Previous</span>
+
+            <strong>
+              {{ aiRecommendation.previous_weight }} kg
+            </strong>
+          </div>
+
+
+          @if (aiRecommendation.recent_best_weight !== undefined) {
+            <div>
+              <span>Recent Best</span>
+
+              <strong>
+                {{ aiRecommendation.recent_best_weight }} kg
+              </strong>
+            </div>
+          }
+
+
+          @if (aiRecommendation.recent_average_weight !== undefined) {
+            <div>
+              <span>Recent Average</span>
+
+              <strong>
+                {{ aiRecommendation.recent_average_weight }} kg
+              </strong>
+            </div>
+          }
+
+
+          <div>
+            <span>Training History</span>
+
+            <strong>
+              {{ aiRecommendation.historical_sessions }} sessions
+            </strong>
+          </div>
+
         </div>
 
-        <div class="form-group">
-          <label for="weight">Weight (kg)</label>
-          <input
-            id="weight"
-            name="weight"
-            type="number"
-            min="0"
-            step="0.5"
-            [(ngModel)]="weight"
-          />
+
+        <div class="recommendation-message">
+
+          <span class="message-mark">AI</span>
+
+          <p>
+            {{ aiRecommendation.message }}
+          </p>
+
         </div>
 
-        <div class="form-group">
-          <label for="duration">Duration (minutes)</label>
-          <input
-            id="duration"
-            name="duration"
-            type="number"
-            min="0"
-            [(ngModel)]="duration"
-          />
-        </div>
 
-        <div class="form-group">
-          <label for="date">Date</label>
-          <input
-            id="date"
-            name="date"
-            type="date"
-            [(ngModel)]="date"
-          />
-        </div>
+        @if (aiRecommendation.safety_adjustment) {
+          <div class="recommendation-adjustment">
+            {{ aiRecommendation.safety_adjustment }}
+          </div>
+        }
+
+      </div>
+    }
+
+
+    @if (recommendationError()) {
+      <div class="recommendation-error">
+        {{ recommendationError() }}
+      </div>
+    }
+
+
+    <div class="form-group">
+
+      <label for="muscleGroup">
+        Muscle Group
+      </label>
+
+      <input
+        id="muscleGroup"
+        name="muscleGroup"
+        type="text"
+        [(ngModel)]="muscleGroup"
+        placeholder="e.g. Chest"
+      />
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="sets">
+        Sets
+      </label>
+
+      <input
+        id="sets"
+        name="sets"
+        type="number"
+        min="1"
+        [(ngModel)]="sets"
+      />
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="reps">
+        Reps
+      </label>
+
+      <input
+        id="reps"
+        name="reps"
+        type="number"
+        min="1"
+        [(ngModel)]="reps"
+      />
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="weight">
+        Weight
+      </label>
+
+      <div class="input-with-unit">
+
+        <input
+          id="weight"
+          name="weight"
+          type="number"
+          min="0"
+          step="0.5"
+          [(ngModel)]="weight"
+        />
+
+        <span>kg</span>
+
       </div>
 
-      @if (errorMessage()) {
-        <p class="error-message">
-          {{ errorMessage() }}
-        </p>
-      }
+    </div>
 
-      <button type="submit" [disabled]="isSaving">
-        {{ isSaving ? 'Saving...' : 'Add Workout' }}
-      </button>
-    </form>
+
+    <div class="form-group">
+
+      <label for="duration">
+        Duration
+      </label>
+
+      <div class="input-with-unit">
+
+        <input
+          id="duration"
+          name="duration"
+          type="number"
+          min="0"
+          [(ngModel)]="duration"
+        />
+
+        <span>min</span>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label for="date">
+        Date
+      </label>
+
+      <input
+        id="date"
+        name="date"
+        type="date"
+        [(ngModel)]="date"
+      />
+
+    </div>
+
+  </div>
+
+
+  @if (errorMessage()) {
+
+    <div class="error-message">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+
+  <div class="form-footer">
+
+    <span class="form-note">
+      Your workout will be added to your training history.
+    </span>
+
+    <button
+      type="submit"
+      [disabled]="isSaving"
+    >
+      {{ isSaving ? 'Saving...' : 'Log Workout' }}
+    </button>
+
+  </div>
+
+</form>
+
+
   </section>
 
   <section class="history-section">
-    <div class="section-header">
-      <h2>Workout History</h2>
+
+
+<div class="section-header">
+
+  <div>
+
+    <span class="eyebrow">RECENT ACTIVITY</span>
+
+    <h2>Workout History</h2>
+
+    <p>
+      Your recorded training sessions.
+    </p>
+
+  </div>
+
+
+  @if (!isLoading() && workouts().length > 0) {
+
+    <span class="history-count">
+      {{ workouts().length }} sessions
+    </span>
+
+  }
+
+</div>
+
+
+@if (isLoading()) {
+
+  <div class="state-message loading-state">
+
+    <span class="loading-line"></span>
+
+    Loading workouts...
+
+  </div>
+
+}
+
+
+@if (!isLoading() && workouts().length === 0) {
+
+  <div class="state-message empty-state">
+
+    <span class="empty-number">
+      00
+    </span>
+
+    <div>
+
+      <strong>
+        No workouts yet
+      </strong>
+
+      <p>
+        Your recorded sessions will appear here.
+      </p>
+
     </div>
 
-    @if (isLoading()) {
-      <div class="state-message">
-        Loading workouts...
-      </div>
+  </div>
+
+}
+
+
+@if (!isLoading() && workouts().length > 0) {
+
+  <div class="workout-list">
+
+    @for (
+      workout of workouts();
+      track workout.id
+    ) {
+
+      <article class="workout-card">
+
+        <div class="workout-main">
+
+          <div class="workout-index">
+            {{ $index + 1 }}
+          </div>
+
+          <div class="workout-title">
+
+            <h3>
+              {{ workout.exercise }}
+            </h3>
+
+            <span>
+              {{ workout.muscle_group }}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="workout-details">
+
+          <div class="workout-stat">
+            <span>Sets</span>
+            <strong>{{ workout.sets }}</strong>
+          </div>
+
+
+          <div class="workout-stat">
+            <span>Reps</span>
+            <strong>{{ workout.reps }}</strong>
+          </div>
+
+
+          <div class="workout-stat">
+            <span>Weight</span>
+            <strong>{{ workout.weight }} kg</strong>
+          </div>
+
+
+          <div class="workout-stat">
+            <span>Duration</span>
+            <strong>{{ workout.duration }} min</strong>
+          </div>
+
+
+          <div class="workout-stat date-stat">
+            <span>Date</span>
+            <strong>{{ workout.date }}</strong>
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="delete-button"
+          (click)="deleteWorkout(workout.id)"
+          aria-label="Delete workout"
+        >
+          Delete
+        </button>
+
+      </article>
+
     }
 
-    @if (!isLoading() && workouts().length === 0) {
-      <div class="state-message">
-        No workouts recorded yet.
-      </div>
-    }
+  </div>
 
-    @if (!isLoading() && workouts().length > 0) {
-      <div class="workout-list">
-        @for (workout of workouts(); track workout.id) {
-          <article class="workout-card">
-            <div>
-              <h3>{{ workout.exercise }}</h3>
-              <p>{{ workout.muscle_group }}</p>
-            </div>
+}
 
-            <div class="workout-details">
-              <span>{{ workout.sets }} sets</span>
-              <span>{{ workout.reps }} reps</span>
-              <span>{{ workout.weight }} kg</span>
-              <span>{{ workout.duration }} min</span>
-              <span>{{ workout.date }}</span>
-            </div>
-
-            <button
-              type="button"
-              class="delete-button"
-              (click)="deleteWorkout(workout.id)"
-            >
-              Delete
-            </button>
-          </article>
-        }
-      </div>
-    }
   </section>
+
 </div>

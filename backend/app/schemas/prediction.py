@@ -10,3 +10,7 @@ class PredictionResponse(BaseModel):
     prediction: str
     confidence: float
     created_at: datetime
+
+
+class WorkoutWeightPredictionRequest(BaseModel):
+    exercise_name: str

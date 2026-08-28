@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import {
   Workout,
   WorkoutCreate,
+  WorkoutRecommendation,
   WorkoutService,
   WorkoutSummary,
 } from '../../../core/services/workout.service';
@@ -19,6 +20,13 @@ export class Workouts implements OnInit {
 
   readonly workouts = signal<Workout[]>([]);
   readonly summary = signal<WorkoutSummary | null>(null);
+
+  readonly recommendation =
+    signal<WorkoutRecommendation | null>(null);
+
+  readonly recommendationLoading = signal(false);
+  readonly recommendationError = signal('');
+
   readonly isLoading = signal(true);
   readonly errorMessage = signal('');
 
@@ -70,6 +78,45 @@ export class Workouts implements OnInit {
     });
   }
 
+  loadRecommendation(): void {
+    const exerciseName = this.exercise.trim();
+
+    this.recommendation.set(null);
+    this.recommendationError.set('');
+
+    if (!exerciseName) {
+      return;
+    }
+
+    this.recommendationLoading.set(true);
+
+    this.workoutService
+      .getRecommendation(exerciseName)
+      .subscribe({
+        next: (data) => {
+          this.recommendation.set(data);
+          this.recommendationLoading.set(false);
+        },
+        error: (error) => {
+          this.recommendationLoading.set(false);
+
+          if (error.status === 404) {
+            this.recommendationError.set(
+              'AI recommendation is not available for this exercise.',
+            );
+          } else if (error.status === 401) {
+            this.recommendationError.set(
+              'Your session has expired. Please log in again.',
+            );
+          } else {
+            this.recommendationError.set(
+              'Unable to generate an AI recommendation.',
+            );
+          }
+        },
+      });
+  }
+
   addWorkout(): void {
     this.errorMessage.set('');
 
@@ -102,6 +149,9 @@ export class Workouts implements OnInit {
         this.reps = 10;
         this.weight = 0;
         this.duration = 30;
+
+        this.recommendation.set(null);
+        this.recommendationError.set('');
 
         this.loadWorkouts();
       },

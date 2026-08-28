@@ -15,6 +15,19 @@ export interface Workout {
   duration: number;
   date: string;
 }
+export interface WorkoutRecommendation {
+  exercise: string;
+  recommended_weight: number;
+  predicted_weight?: number;
+  previous_weight: number;
+  recent_best_weight?: number;
+  recent_average_weight?: number;
+  historical_sessions: number;
+  method: string;
+  confidence: number;
+  message: string;
+  safety_adjustment?: string;
+}
 
 export interface WorkoutCreate {
   exercise: string;
@@ -45,6 +58,13 @@ export class WorkoutService {
   createWorkout(workout: WorkoutCreate): Observable<Workout> {
     return this.http.post<Workout>(this.workoutsUrl, workout);
   }
+getRecommendation(
+  exerciseName: string
+): Observable<WorkoutRecommendation> {
+  return this.http.get<WorkoutRecommendation>(
+    `${this.workoutsUrl}/recommendation/${encodeURIComponent(exerciseName)}`
+  );
+}
 
   deleteWorkout(workoutId: string): Observable<void> {
     return this.http.delete<void>(

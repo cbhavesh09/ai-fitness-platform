@@ -1,0 +1,424 @@
+<div class="predictions-page">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="header-copy">
+      <span class="eyebrow">AI FITNESS INTELLIGENCE</span>
+
+      <h1>Predictions</h1>
+
+      <p>
+        Turn your training history into actionable recommendations.
+      </p>
+    </div>
+  </header>
+
+
+  <!-- CALORIE PREDICTION -->
+  <section class="ai-panel calorie-panel">
+
+    <div class="panel-heading">
+      <div>
+        <span class="section-kicker">01 / DAILY ENERGY</span>
+
+        <h2>Calorie-Burn Prediction</h2>
+
+        <p>
+          Estimate your daily energy expenditure using your fitness profile.
+        </p>
+      </div>
+
+      <div class="ai-badge">
+        AI MODEL
+      </div>
+    </div>
+
+
+    @if (latestPrediction(); as prediction) {
+
+      <div class="calorie-result">
+
+        <div class="result-main">
+          <span class="result-label">Estimated Daily Burn</span>
+
+          <div class="result-number">
+            {{ prediction.prediction }}
+          </div>
+
+          <span class="result-date">
+            Generated {{ prediction.created_at | date:'medium' }}
+          </span>
+        </div>
+
+
+        <div class="confidence-block">
+
+          <span>Model confidence</span>
+
+          <strong>
+            {{ prediction.confidence * 100 }}%
+          </strong>
+
+          <div class="confidence-bar">
+            <div
+              class="confidence-fill"
+              [style.width.%]="prediction.confidence * 100"
+            ></div>
+          </div>
+
+        </div>
+
+      </div>
+
+    } @else {
+
+      <div class="empty-result">
+        <span class="empty-icon">AI</span>
+
+        <div>
+          <strong>No prediction yet</strong>
+<p>
+  Log a workout, weight, or calorie entry before generating your first prediction.
+</p>
+        </div>
+      </div>
+
+    }
+
+
+    <button
+      type="button"
+      class="primary-button"
+      (click)="generatePrediction()"
+      [disabled]="isPredicting()"
+    >
+      {{
+        isPredicting()
+          ? 'Generating prediction...'
+          : 'Generate calorie prediction'
+      }}
+    </button>
+
+  </section>
+
+
+  <!-- WORKOUT AI -->
+  <section class="ai-panel workout-panel">
+
+    <div class="panel-heading">
+      <div>
+        <span class="section-kicker">02 / TRAINING LOAD</span>
+
+        <h2>Next Session Recommendation</h2>
+
+        <p>
+          Use your training history and ML model to determine your next working weight.
+        </p>
+      </div>
+
+      <div class="ai-badge">
+        ML POWERED
+      </div>
+    </div>
+
+
+    <!-- EXERCISE -->
+    <div class="exercise-control">
+
+      <label for="exercise">
+        Exercise
+      </label>
+
+      <select
+        id="exercise"
+        [value]="selectedExercise()"
+        (change)="onExerciseChange($event)"
+        [disabled]="exercises().length === 0"
+      >
+
+        @for (exercise of exercises(); track exercise) {
+          <option [value]="exercise">
+            {{ exercise }}
+          </option>
+        }
+
+      </select>
+
+      @if (exercises().length === 0) {
+        <span class="selector-hint">
+          Loading available exercises...
+        </span>
+      }
+
+    </div>
+
+
+    <button
+      type="button"
+      class="primary-button recommendation-button"
+      (click)="generateWorkoutRecommendation()"
+      [disabled]="
+        isWorkoutPredicting() ||
+        exercises().length === 0
+      "
+    >
+      {{
+        isWorkoutPredicting()
+          ? 'Analyzing training history...'
+          : 'Get weight recommendation'
+      }}
+    </button>
+
+
+    <!-- RESULT -->
+    @if (workoutRecommendation(); as recommendation) {
+
+      <div class="recommendation-result">
+
+        <div class="recommendation-hero">
+
+          <div class="recommendation-exercise">
+
+            <span class="result-label">
+              NEXT SESSION
+            </span>
+
+            <h3>
+              {{ recommendation.exercise }}
+            </h3>
+
+            <p>
+              Recommended working weight
+            </p>
+
+          </div>
+
+
+          <div class="weight-result">
+
+            <strong>
+              {{ recommendation.recommended_weight }}
+            </strong>
+
+            <span>kg</span>
+
+          </div>
+
+        </div>
+
+
+        <!-- METRICS -->
+
+        <div class="metrics-grid">
+
+          <div class="metric-card">
+            <span>Previous</span>
+
+            <strong>
+              {{ recommendation.previous_weight }} kg
+            </strong>
+          </div>
+
+
+          @if (recommendation.predicted_weight !== undefined) {
+
+            <div class="metric-card">
+              <span>ML Prediction</span>
+
+              <strong>
+                {{
+                  recommendation.predicted_weight
+                    | number:'1.0-1'
+                }}
+                kg
+              </strong>
+            </div>
+
+          }
+
+
+          @if (recommendation.recent_best_weight !== undefined) {
+
+            <div class="metric-card">
+              <span>Recent Best</span>
+
+              <strong>
+                {{ recommendation.recent_best_weight }} kg
+              </strong>
+            </div>
+
+          }
+
+
+          @if (recommendation.recent_average_weight !== undefined) {
+
+            <div class="metric-card">
+              <span>Recent Average</span>
+
+              <strong>
+                {{
+                  recommendation.recent_average_weight
+                    | number:'1.0-1'
+                }}
+                kg
+              </strong>
+            </div>
+
+          }
+
+
+          <div class="metric-card">
+            <span>Confidence</span>
+
+            <strong>
+              {{ recommendation.confidence * 100 }}%
+            </strong>
+          </div>
+
+
+          <div class="metric-card">
+            <span>Training History</span>
+
+            <strong>
+              {{ recommendation.historical_sessions }}
+              sessions
+            </strong>
+          </div>
+
+        </div>
+
+
+        <!-- EXPLANATION -->
+
+        <div class="recommendation-explanation">
+
+          <div class="explanation-icon">
+            ✓
+          </div>
+
+          <div>
+            <strong>
+              Why this recommendation?
+            </strong>
+
+            <p>
+              {{ recommendation.message }}
+            </p>
+
+            @if (recommendation.safety_adjustment) {
+              <span>
+                {{ recommendation.safety_adjustment }}
+              </span>
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    }
+
+  </section>
+
+
+  <!-- ERROR -->
+
+  @if (errorMessage()) {
+
+    <div class="error-message">
+      {{ errorMessage() }}
+    </div>
+
+  }
+
+
+  <!-- HISTORY -->
+
+  <section class="history-section">
+
+    <div class="history-header">
+
+      <div>
+        <span class="section-kicker">03 / HISTORY</span>
+
+        <h2>Prediction History</h2>
+
+        <p>
+          Previously generated calorie-burn predictions.
+        </p>
+      </div>
+
+    </div>
+
+
+    @if (isLoading()) {
+
+      <div class="state-message">
+        Loading prediction history...
+      </div>
+
+    }
+
+
+    @if (!isLoading() && predictions().length === 0) {
+
+      <div class="state-message">
+        No predictions have been generated yet.
+      </div>
+
+    }
+
+
+    @if (!isLoading() && predictions().length > 0) {
+
+      <div class="prediction-list">
+
+        @for (
+          prediction of predictions();
+          track prediction.id
+        ) {
+
+          <article class="history-card">
+
+            <div class="history-date">
+              {{ prediction.created_at | date:'MMM d, y' }}
+            </div>
+
+            <div class="history-value">
+
+              <strong>
+                {{ prediction.prediction }}
+              </strong>
+
+            </div>
+
+            <div class="history-confidence">
+
+              <span>Confidence</span>
+
+              <strong>
+                {{ prediction.confidence * 100 }}%
+              </strong>
+
+            </div>
+
+            <button
+              type="button"
+              class="delete-button"
+              (click)="deletePrediction(prediction.id)"
+            >
+              Delete
+            </button>
+
+          </article>
+
+        }
+
+      </div>
+
+    }
+
+  </section>
+
+</div>

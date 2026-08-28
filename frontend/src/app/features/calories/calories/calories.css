@@ -1,166 +1,515 @@
 .calories-page {
   min-height: 100vh;
-  padding: 40px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 52px 42px 90px;
+  color: #171717;
 }
 
+/* =========================================================
+   HEADER
+========================================================= */
+
 .page-header {
-  margin-bottom: 32px;
+  margin-bottom: 46px;
+}
+
+.eyebrow {
+  display: inline-block;
+
+  margin-bottom: 10px;
+
+  color: #c2410c;
+
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.16em;
+
+  text-transform: uppercase;
 }
 
 .page-header h1 {
-  margin: 0 0 8px;
-  font-size: 32px;
+  margin: 0 0 12px;
+
+  color: #171717;
+
+  font-size: 50px;
+  line-height: 0.95;
+
+  font-weight: 850;
+  letter-spacing: -0.05em;
 }
 
 .page-header p {
   margin: 0;
-  color: #6b7280;
+
+  color: #737373;
+
+  font-size: 16px;
+  line-height: 1.6;
 }
+
+/* =========================================================
+   SUMMARY
+========================================================= */
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-  margin-bottom: 24px;
-}
 
-.summary-card,
-.calorie-form-card,
-.calorie-card,
-.state-message {
-  background: white;
-  border-radius: 14px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 16px;
+
+  margin-bottom: 38px;
 }
 
 .summary-card {
-  padding: 24px;
+  position: relative;
+
+  min-height: 165px;
+
+  padding: 27px;
+
+  overflow: hidden;
+
+  background: #ffffff;
+
+  border: 1px solid #dedbd4;
+  border-radius: 18px;
+
+  box-shadow: 0 10px 28px rgba(23, 23, 23, 0.045);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-.summary-card span {
+.summary-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 15px 32px rgba(23, 23, 23, 0.065);
+}
+
+.summary-card.primary-card {
+  background: #171717;
+
+  border-color: #171717;
+}
+
+.summary-card::after {
+  content: "";
+
+  position: absolute;
+
+  right: -55px;
+  bottom: -70px;
+
+  width: 180px;
+  height: 180px;
+
+  border-radius: 50%;
+
+  background: #f1f0ec;
+}
+
+.summary-card.primary-card::after {
+  background: #242424;
+}
+
+.card-label {
+  position: relative;
+  z-index: 2;
+
   display: block;
-  color: #6b7280;
-  font-size: 14px;
-  margin-bottom: 8px;
+
+  margin-bottom: 16px;
+
+  color: #737373;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+}
+
+.primary-card .card-label {
+  color: #a3a3a3;
 }
 
 .summary-card strong {
-  font-size: 28px;
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  color: #171717;
+
+  font-size: 40px;
+  line-height: 1;
+
+  font-weight: 850;
+  letter-spacing: -0.05em;
 }
+
+.primary-card strong {
+  color: #ffffff;
+}
+
+.summary-card p {
+  position: relative;
+  z-index: 2;
+
+  margin: 10px 0 0;
+
+  color: #a3a3a3;
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
 
 .calorie-form-card {
-  padding: 28px;
-  margin-bottom: 32px;
+  margin-bottom: 56px;
+
+  padding: 32px;
+
+  background: #ffffff;
+
+  border: 1px solid #dedbd4;
+  border-radius: 19px;
+
+  box-shadow: 0 12px 34px rgba(23, 23, 23, 0.05);
 }
 
-.calorie-form-card h2,
-.history-section h2 {
-  margin-top: 0;
+.section-heading {
+  margin-bottom: 30px;
+}
+
+.section-heading h2,
+.section-header h2 {
+  margin: 5px 0 7px;
+
+  color: #171717;
+
+  font-size: 27px;
+  line-height: 1.15;
+
+  font-weight: 850;
+  letter-spacing: -0.035em;
+}
+
+.section-heading p,
+.section-header p {
+  margin: 0;
+
+  color: #737373;
+
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .form-grid {
   display: grid;
+
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
   gap: 20px;
 }
 
 .form-group label {
   display: block;
+
   margin-bottom: 8px;
-  font-weight: 600;
+
+  color: #404040;
+
+  font-size: 12px;
+  font-weight: 750;
 }
 
 .form-group input {
+  box-sizing: border-box;
+
   width: 100%;
-  padding: 11px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 15px;
+  height: 48px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d4d4d4;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #171717;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.form-group input:hover {
+  border-color: #a3a3a3;
 }
 
 .form-group input:focus {
   outline: none;
-  border-color: #2563eb;
+
+  border-color: #f97316;
+
+  box-shadow:
+    0 0 0 3px rgba(249, 115, 22, 0.12);
 }
 
-.calorie-form-card button {
-  margin-top: 24px;
-  padding: 12px 20px;
+/* =========================================================
+   FORM ACTION
+========================================================= */
+
+.error-message {
+  margin: 20px 0 0;
+
+  padding: 12px 14px;
+
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+
+  background: #fef2f2;
+  color: #b91c1c;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.calorie-form-card form > button {
+  min-width: 148px;
+
+  height: 44px;
+
+  margin-top: 25px;
+  padding: 0 21px;
+
   border: none;
   border-radius: 8px;
-  background: #2563eb;
-  color: white;
-  font-weight: 600;
+
+  background: #171717;
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 12px;
+  font-weight: 750;
+
   cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
-.calorie-form-card button:disabled {
-  opacity: 0.6;
+.calorie-form-card form > button:hover:not(:disabled) {
+  background: #2b2b2b;
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 8px 20px rgba(23, 23, 23, 0.13);
+}
+
+.calorie-form-card form > button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.calorie-form-card form > button:disabled {
+  opacity: 0.55;
+
   cursor: not-allowed;
 }
 
-.error-message {
-  color: #dc2626;
-  margin: 16px 0 0;
-}
+/* =========================================================
+   HISTORY
+========================================================= */
 
 .history-section {
-  margin-top: 32px;
+  margin-top: 10px;
+}
+
+.section-header {
+  margin-bottom: 20px;
 }
 
 .calorie-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+
+  gap: 9px;
 }
 
 .calorie-card {
-  display: flex;
+  display: grid;
+
+  grid-template-columns: 1fr auto;
+
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 20px;
+
+  min-height: 86px;
+
+  padding: 17px 20px;
+
+  background: #ffffff;
+
+  border: 1px solid #dedbd4;
+  border-radius: 12px;
+
+  box-shadow: 0 5px 18px rgba(23, 23, 23, 0.025);
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
 }
 
-.calorie-card div {
+.calorie-card:hover {
+  border-color: #c4c1ba;
+
+  transform: translateX(2px);
+
+  box-shadow: 0 9px 25px rgba(23, 23, 23, 0.055);
+}
+
+.calorie-info {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+
+  gap: 5px;
 }
 
-.calorie-card strong {
-  font-size: 20px;
+.calorie-label {
+  color: #a3a3a3;
+
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
 }
 
-.calorie-card span {
-  color: #6b7280;
-  font-size: 14px;
+.calorie-info strong {
+  color: #171717;
+
+  font-size: 19px;
+  font-weight: 850;
+
+  letter-spacing: -0.025em;
 }
+
+.calorie-date {
+  color: #a3a3a3;
+
+  font-size: 11px;
+}
+
+/* =========================================================
+   DELETE
+========================================================= */
 
 .delete-button {
-  padding: 9px 14px;
-  border: 1px solid #dc2626;
-  border-radius: 8px;
-  background: white;
-  color: #dc2626;
+  padding: 8px 11px;
+
+  border: 1px solid #dedbd4;
+  border-radius: 7px;
+
+  background: #ffffff;
+  color: #a3a3a3;
+
+  font-family: inherit;
+
+  font-size: 10px;
+  font-weight: 750;
+
   cursor: pointer;
+
+  transition:
+    color 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease;
 }
 
-.state-message {
-  padding: 24px;
+.delete-button:hover {
+  border-color: #fecaca;
+
+  background: #fef2f2;
+
+  color: #dc2626;
 }
+
+/* =========================================================
+   STATES
+========================================================= */
+
+.state-message {
+  padding: 21px;
+
+  border: 1px solid #dedbd4;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  color: #737373;
+
+  font-size: 13px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
 
 @media (max-width: 800px) {
   .calories-page {
-    padding: 20px;
+    padding: 42px 30px 65px;
   }
 
-  .summary-grid,
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .calories-page {
+    padding: 30px 20px 50px;
+  }
+
+  .page-header h1 {
+    font-size: 40px;
+  }
+
+  .calorie-form-card {
+    padding: 24px 20px;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }
 
   .calorie-card {
-    align-items: flex-start;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 420px) {
+  .page-header h1 {
+    font-size: 34px;
+  }
+
+  .summary-card {
+    padding: 22px;
+  }
+
+  .summary-card strong {
+    font-size: 34px;
   }
 }

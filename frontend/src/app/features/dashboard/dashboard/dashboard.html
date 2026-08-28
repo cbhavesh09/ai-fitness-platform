@@ -1,74 +1,264 @@
 <div class="dashboard-page">
-<header class="dashboard-header">
-  <div>
-    <h1>Dashboard</h1>
-    <p>Your fitness overview</p>
+
+  <header class="dashboard-header">
+
+```
+<div>
+  <span class="eyebrow">PERFORMANCE OVERVIEW</span>
+
+  <h1>Your training, at a glance.</h1>
+
+  <p>
+    Monitor your progress, training consistency, and AI insights.
+  </p>
+</div>
+```
+
+  </header>
+
+@if (isLoading()) {
+
+```
+<div class="state-message">
+  Loading performance data...
+</div>
+```
+
+}
+
+@if (errorMessage()) {
+
+```
+<div class="state-message error">
+  {{ errorMessage() }}
+</div>
+```
+
+}
+
+@if (dashboard() && !isLoading()) {
+
+```
+<section class="performance-grid">
+
+  <article class="performance-card weight-card">
+
+    <div class="card-topline">
+      <span class="card-label">
+        BODY WEIGHT
+      </span>
+
+      <span class="card-index">
+        01
+      </span>
+    </div>
+
+    <div class="metric">
+
+      <strong>
+        {{ dashboard()?.current_weight ?? '—' }}
+      </strong>
+
+      @if (dashboard()?.current_weight !== null) {
+        <span>kg</span>
+      }
+
+    </div>
+
+    <p>
+      Latest recorded measurement
+    </p>
+
+  </article>
+
+  <article class="performance-card calories-card">
+
+    <div class="card-topline">
+      <span class="card-label">
+        CALORIES
+      </span>
+
+      <span class="card-index">
+        02
+      </span>
+    </div>
+
+    <div class="metric">
+
+      <strong>
+        {{ dashboard()?.latest_calories ?? '—' }}
+      </strong>
+
+      @if (dashboard()?.latest_calories !== null) {
+        <span>kcal</span>
+      }
+
+    </div>
+
+    <p>
+      Most recent calorie entry
+    </p>
+
+  </article>
+
+  <article class="performance-card workout-card">
+
+    <div class="card-topline">
+      <span class="card-label">
+        TOTAL WORKOUTS
+      </span>
+
+      <span class="card-index">
+        03
+      </span>
+    </div>
+
+    <div class="metric">
+
+      <strong>
+        {{ dashboard()?.total_workouts }}
+      </strong>
+
+      <span>
+        sessions
+      </span>
+
+    </div>
+
+    <p>
+      Training sessions recorded
+    </p>
+
+  </article>
+
+  <article class="performance-card today-card">
+
+    <div class="card-topline">
+      <span class="card-label">
+        TODAY
+      </span>
+
+      <span class="card-index">
+        04
+      </span>
+    </div>
+
+    <div class="metric">
+
+      <strong>
+        {{ dashboard()?.today_workouts }}
+      </strong>
+
+      <span>
+        sessions
+      </span>
+
+    </div>
+
+    <p>
+      Completed today
+    </p>
+
+  </article>
+
+</section>
+
+<section class="ai-panel">
+
+  <div class="ai-panel-main">
+
+    <div class="ai-copy">
+
+      <div class="ai-heading">
+
+        <span class="ai-marker">
+          AI
+        </span>
+
+        <span class="eyebrow">
+          TRAINING INTELLIGENCE
+        </span>
+
+      </div>
+
+      <h2>
+        Latest prediction
+      </h2>
+
+      <p>
+        Your most recent AI-generated fitness prediction
+        based on your recorded training data.
+      </p>
+
+    </div>
+
+    <div class="ai-result">
+
+      <span>
+        PREDICTED OUTPUT
+      </span>
+
+      <strong>
+        {{ dashboard()?.latest_prediction ?? '—' }}
+      </strong>
+
+    </div>
+
   </div>
 
-  <button
-    type="button"
-    class="logout-button"
-    (click)="logout()"
-  >
-    Logout
-  </button>
-</header>
+  <div class="ai-panel-footer">
 
-  @if (isLoading()) {
-    <div class="state-message">
-      Loading dashboard...
-    </div>
-  }
+    <div>
 
-  @if (errorMessage()) {
-    <div class="state-message error">
-      {{ errorMessage() }}
-    </div>
-  }
+      <span>
+        MODEL CONFIDENCE
+      </span>
 
-  @if (dashboard() && !isLoading()) {
-    <section class="summary-grid">
-      <article class="summary-card">
-        <span class="card-label">Current Weight</span>
-        <strong>{{ dashboard()?.current_weight ?? '—' }}</strong>
-        <span class="card-unit">
-          {{ dashboard()?.current_weight !== null ? 'kg' : '' }}
-        </span>
-      </article>
+      <div class="confidence-bar">
 
-      <article class="summary-card">
-        <span class="card-label">Latest Calories</span>
-        <strong>{{ dashboard()?.latest_calories ?? '—' }}</strong>
-        <span class="card-unit">
-          {{ dashboard()?.latest_calories !== null ? 'kcal' : '' }}
-        </span>
-      </article>
-
-      <article class="summary-card">
-        <span class="card-label">Total Workouts</span>
-        <strong>{{ dashboard()?.total_workouts }}</strong>
-      </article>
-
-      <article class="summary-card">
-        <span class="card-label">Today's Workouts</span>
-        <strong>{{ dashboard()?.today_workouts }}</strong>
-      </article>
-
-      <article class="summary-card">
-        <span class="card-label">Latest Prediction</span>
-        <strong>{{ dashboard()?.latest_prediction ?? '—' }}</strong>
-      </article>
-
-      <article class="summary-card">
-        <span class="card-label">Prediction Confidence</span>
-        <strong>
-          {{
+        <div
+          class="confidence-fill"
+          [style.width.%]="
             dashboard()?.prediction_confidence !== null
-              ? (dashboard()!.prediction_confidence! * 100) + '%'
-              : '—'
-          }}
-        </strong>
-      </article>
-    </section>
-  }
+              ? dashboard()!.prediction_confidence! * 100
+              : 0
+          "
+        ></div>
+
+      </div>
+
+    </div>
+
+    <strong class="confidence-value">
+
+      {{
+        dashboard()?.prediction_confidence !== null
+          ? (dashboard()!.prediction_confidence! * 100) + '%'
+          : '—'
+      }}
+
+    </strong>
+
+  </div>
+
+</section>
+
+<section class="dashboard-note">
+
+  <div class="note-line"></div>
+
+  <p>
+    Keep training consistently. Your historical data helps
+    the recommendation engine become more useful over time.
+  </p>
+
+  <span>
+    AI FITNESS / PERFORMANCE LAB
+  </span>
+
+</section>
+```
+
+}
+
 </div>

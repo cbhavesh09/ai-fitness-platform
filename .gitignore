@@ -21,10 +21,12 @@ dist/
 # ML artifacts
 *.joblib
 *.pkl
+!models/workout_weight_model.joblib
 
 # Data
 data/raw/
-data/processed/
+data/processed/*
+!data/processed/workout_progression_features.csv
 
 # IDE
 .vscode/
@@ -34,6 +36,6 @@ data/processed/
 .DS_Store
 Thumbs.db
 
-.env
-.env.*
-!.env.example
+# IDE
+.vscode/
+.idea/
