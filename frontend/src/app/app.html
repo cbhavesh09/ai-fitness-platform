@@ -1,121 +1,229 @@
 @if (isAuthenticated()) {
 
-  <div class="app-shell">
+  <div
+    class="app-shell"
+    [class.mobile-menu-open]="isMobileMenuOpen"
+  >
 
-```
-<aside class="sidebar">
+    <!-- MOBILE TOP BAR -->
+    <header class="mobile-header">
 
-  <div class="brand">
-
-    <div class="brand-icon" aria-label="AI Fitness logo">
-      <svg
-        viewBox="0 0 32 32"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
+      <button
+        type="button"
+        class="mobile-menu-button"
+        (click)="toggleMobileMenu()"
+        [attr.aria-label]="
+          isMobileMenuOpen
+            ? 'Close navigation menu'
+            : 'Open navigation menu'
+        "
       >
-        <path
-          d="M5 19L9 11L13 21L17 9L21 19L27 12"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </div>
+        @if (isMobileMenuOpen) {
+          <span>×</span>
+        } @else {
+          <span>☰</span>
+        }
+      </button>
 
-    <div class="brand-copy">
-      <strong>AI FITNESS</strong>
-      <span>Performance Lab</span>
-    </div>
+      <div class="mobile-brand">
+        <div class="mobile-brand-icon">
+          <svg
+            viewBox="0 0 32 32"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 19L9 11L13 21L17 9L21 19L27 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </div>
 
-  </div>
-
-  <div class="nav-section">
-
-    <span class="nav-label">TRAINING</span>
-
-    <nav class="navigation">
-
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <span>Dashboard</span>
-      </a>
-
-      <a
-        routerLink="/workouts"
-        routerLinkActive="active"
-      >
-        <span>Workouts</span>
-      </a>
-
-      <a
-        routerLink="/weight"
-        routerLinkActive="active"
-      >
-        <span>Weight</span>
-      </a>
-
-      <a
-        routerLink="/calories"
-        routerLinkActive="active"
-      >
-        <span>Calories</span>
-      </a>
-
-    </nav>
-
-  </div>
-
-  <div class="nav-section intelligence-section">
-
-    <span class="nav-label">INTELLIGENCE</span>
-
-    <nav class="navigation">
-
-      <a
-        routerLink="/predictions"
-        routerLinkActive="active"
-      >
-        <span>AI Predictions</span>
-      </a>
-
-    </nav>
-
-  </div>
-
-  <div class="sidebar-footer">
-
-    <div class="system-status">
-
-      <span class="status-dot"></span>
-
-      <div>
-        <strong>System Online</strong>
-        <span>AI engine ready</span>
+        <strong>AI FITNESS</strong>
       </div>
 
-    </div>
+    </header>
 
-    <button
-      type="button"
-      class="logout-button"
-      (click)="logout()"
-    >
-      Logout
-    </button>
 
-  </div>
+    <!-- MOBILE OVERLAY -->
+    @if (isMobileMenuOpen) {
 
-</aside>
+      <button
+        type="button"
+        class="mobile-overlay"
+        aria-label="Close navigation menu"
+        (click)="closeMobileMenu()"
+      ></button>
 
-<main class="main-content">
-  <router-outlet />
-</main>
-```
+    }
+
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="brand">
+
+        <div
+          class="brand-icon"
+          aria-label="AI Fitness logo"
+        >
+
+          <svg
+            viewBox="0 0 32 32"
+            xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
+          >
+            <path
+              d="M5 19L9 11L13 21L17 9L21 19L27 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+
+        </div>
+
+        <div class="brand-copy">
+
+          <strong>
+            AI FITNESS
+          </strong>
+
+          <span>
+            Performance Lab
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="nav-section">
+
+        <span class="nav-label">
+          TRAINING
+        </span>
+
+        <nav class="navigation">
+
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="closeMobileMenu()"
+          >
+            <span>
+              Dashboard
+            </span>
+          </a>
+
+
+          <a
+            routerLink="/workouts"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span>
+              Workouts
+            </span>
+          </a>
+
+
+          <a
+            routerLink="/weight"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span>
+              Weight
+            </span>
+          </a>
+
+
+          <a
+            routerLink="/calories"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span>
+              Calories
+            </span>
+          </a>
+
+        </nav>
+
+      </div>
+
+
+      <div class="nav-section intelligence-section">
+
+        <span class="nav-label">
+          INTELLIGENCE
+        </span>
+
+        <nav class="navigation">
+
+          <a
+            routerLink="/predictions"
+            routerLinkActive="active"
+            (click)="closeMobileMenu()"
+          >
+            <span>
+              AI Predictions
+            </span>
+          </a>
+
+        </nav>
+
+      </div>
+
+
+      <div class="sidebar-footer">
+
+        <div class="system-status">
+
+          <span class="status-dot"></span>
+
+          <div>
+
+            <strong>
+              System Online
+            </strong>
+
+            <span>
+              AI engine ready
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="logout-button"
+          (click)="logout()"
+        >
+          Logout
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+
+      <router-outlet />
+
+    </main>
 
   </div>
 
