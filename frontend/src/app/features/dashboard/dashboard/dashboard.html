@@ -2,7 +2,7 @@
 
   <header class="dashboard-header">
 
-```
+
 <div>
   <span class="eyebrow">PERFORMANCE OVERVIEW</span>
 
@@ -12,33 +12,33 @@
     Monitor your progress, training consistency, and AI insights.
   </p>
 </div>
-```
+
 
   </header>
 
 @if (isLoading()) {
 
-```
+
 <div class="state-message">
   Loading performance data...
 </div>
-```
+
 
 }
 
 @if (errorMessage()) {
 
-```
+
 <div class="state-message error">
   {{ errorMessage() }}
 </div>
-```
+
 
 }
 
 @if (dashboard() && !isLoading()) {
 
-```
+
 <section class="performance-grid">
 
   <article class="performance-card weight-card">
@@ -257,7 +257,7 @@
   </span>
 
 </section>
-```
+
 
 }
 
