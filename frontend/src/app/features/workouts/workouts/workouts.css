@@ -998,14 +998,19 @@ grid-column: 1 / -1;
 }
 
 @media (max-width: 450px) {
+  .recommendation-card {
+    padding: 17px;
+  }
 
-.recommendation-card {
-padding: 17px;
+  .recommended-weight strong {
+    font-size: 25px;
+  }
 }
 
-.recommended-weight strong {
-font-size: 25px;
-}
+
+/* =========================================================
+   WORKOUT HISTORY — DATE NAVIGATION
+   ========================================================= */
 
 .history-layout {
   display: flex;
@@ -1021,6 +1026,7 @@ font-size: 25px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
   margin-bottom: 12px;
 }
 
@@ -1040,12 +1046,20 @@ font-size: 25px;
 .date-tabs {
   display: flex;
   gap: 10px;
+  width: 100%;
   overflow-x: auto;
   padding: 4px 2px 10px;
+
+  /* Hide ugly browser scrollbar where possible */
   scrollbar-width: thin;
+
+  /* Prevent buttons from shrinking */
+  align-items: stretch;
 }
 
 .date-tab {
+  box-sizing: border-box;
+
   flex: 0 0 120px;
   min-height: 108px;
 
@@ -1059,15 +1073,23 @@ font-size: 25px;
   border: 1px solid #dedbd6;
   border-radius: 12px;
 
-  background: #fff;
+  background: #ffffff;
   color: #171717;
+
+  font-family: inherit;
+  font-size: inherit;
+  line-height: normal;
 
   cursor: pointer;
   text-align: left;
 
+  appearance: none;
+  -webkit-appearance: none;
+
   transition:
     border-color 0.2s ease,
     background 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease,
     box-shadow 0.2s ease;
 }
@@ -1080,17 +1102,19 @@ font-size: 25px;
 .date-tab.active {
   border-color: #ff7200;
   background: #171717;
-  color: #fff;
+  color: #ffffff;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 .date-day {
+  display: block;
   font-size: 28px;
   font-weight: 800;
   line-height: 1;
 }
 
 .date-month {
+  display: block;
   margin-top: 4px;
   font-size: 12px;
   font-weight: 800;
@@ -1099,6 +1123,7 @@ font-size: 25px;
 }
 
 .date-year {
+  display: block;
   margin-top: 2px;
   font-size: 11px;
   color: #999;
@@ -1109,6 +1134,7 @@ font-size: 25px;
 }
 
 .date-workout-count {
+  display: block;
   margin-top: 12px;
   font-size: 11px;
   font-weight: 700;
@@ -1142,6 +1168,11 @@ font-size: 25px;
   white-space: nowrap;
 }
 
+
+/* =========================================================
+   DATE NAVIGATION — RESPONSIVE
+   ========================================================= */
+
 @media (max-width: 700px) {
   .selected-day-header {
     align-items: flex-start;
@@ -1153,8 +1184,23 @@ font-size: 25px;
   }
 
   .date-tab {
-    padding: 10px 14px;
+    flex-basis: 120px;
+    padding: 14px;
   }
 }
 
+@media (max-width: 450px) {
+  .date-tab {
+    flex-basis: 112px;
+    min-height: 102px;
+    padding: 12px;
+  }
+
+  .date-day {
+    font-size: 25px;
+  }
+
+  .date-workout-count {
+    margin-top: 10px;
+  }
 }
