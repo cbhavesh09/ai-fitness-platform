@@ -55,8 +55,8 @@ def root():
 def debug_config():
     return {
         "frontend_url": settings.frontend_url,
-        "mongodb_database": settings.mongodb_database,
-        "jwt_configured": bool(settings.jwt_secret),
+        "frontend_url_repr": repr(settings.frontend_url),
+        "frontend_url_length": len(settings.frontend_url),
     }
 
 @app.get("/protected")
