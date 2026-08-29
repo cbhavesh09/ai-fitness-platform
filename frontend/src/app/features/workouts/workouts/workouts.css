@@ -1013,32 +1013,110 @@ font-size: 25px;
   gap: 24px;
 }
 
+.date-navigation {
+  margin-bottom: 28px;
+}
+
+.date-navigation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.date-navigation-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #777;
+}
+
+.date-navigation-count {
+  font-size: 12px;
+  color: #999;
+}
+
 .date-tabs {
   display: flex;
   gap: 10px;
   overflow-x: auto;
-  padding-bottom: 4px;
+  padding: 4px 2px 10px;
+  scrollbar-width: thin;
 }
 
 .date-tab {
-  border: 1px solid #d9d9d9;
-  background: #ffffff;
-  padding: 12px 18px;
-  border-radius: 10px;
+  flex: 0 0 120px;
+  min-height: 108px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 16px;
+
+  border: 1px solid #dedbd6;
+  border-radius: 12px;
+
+  background: #fff;
+  color: #171717;
+
   cursor: pointer;
-  white-space: nowrap;
-  font: inherit;
-  transition: 0.2s ease;
+  text-align: left;
+
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .date-tab:hover {
-  border-color: #111111;
+  border-color: #bdb9b2;
+  transform: translateY(-1px);
 }
 
 .date-tab.active {
-  background: #111111;
-  color: #ffffff;
-  border-color: #111111;
+  border-color: #ff7200;
+  background: #171717;
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+.date-day {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.date-month {
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.date-year {
+  margin-top: 2px;
+  font-size: 11px;
+  color: #999;
+}
+
+.date-tab.active .date-year {
+  color: #aaa;
+}
+
+.date-workout-count {
+  margin-top: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #777;
+}
+
+.date-tab.active .date-workout-count {
+  color: #ff8a2b;
 }
 
 .selected-day {

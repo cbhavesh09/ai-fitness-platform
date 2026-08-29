@@ -26,7 +26,7 @@ get workoutDates(): string[] {
     ...new Set(
       this.workouts().map((workout) => workout.date)
     ),
-  ];
+  ].sort((a, b) => b.localeCompare(a));
 }
 
 getWorkoutsForDate(date: string): Workout[] {

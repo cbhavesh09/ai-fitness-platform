@@ -50,6 +50,8 @@ export interface WorkoutSummary {
 export class WorkoutService {
   private readonly http = inject(HttpClient);
   private readonly workoutsUrl = `${API_CONFIG.baseUrl}/workouts`;
+  private readonly predictionsUrl =
+  `${API_CONFIG.baseUrl}/predictions`;
 
   getWorkouts(): Observable<Workout[]> {
     return this.http.get<Workout[]>(this.workoutsUrl);
@@ -61,8 +63,11 @@ export class WorkoutService {
 getRecommendation(
   exerciseName: string
 ): Observable<WorkoutRecommendation> {
-  return this.http.get<WorkoutRecommendation>(
-    `${this.workoutsUrl}/recommendation/${encodeURIComponent(exerciseName)}`
+  return this.http.post<WorkoutRecommendation>(
+    `${this.predictionsUrl}/workout-weight`,
+    {
+      exercise_name: exerciseName,
+    }
   );
 }
 

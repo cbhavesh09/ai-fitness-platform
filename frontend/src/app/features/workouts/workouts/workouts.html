@@ -419,9 +419,10 @@
 
   @if (!isLoading() && workouts().length > 0) {
 
-    <span class="history-count">
-      {{ workouts().length }} sessions
-    </span>
+<span class="history-count">
+  {{ workouts().length }}
+  {{ workouts().length === 1 ? 'workout' : 'workouts' }}
+</span>
 
   }
 
@@ -471,22 +472,49 @@
   <div class="history-layout">
 
     <!-- DATE TABS -->
-    <div class="date-tabs">
+<!-- DATE TABS -->
+<div class="date-navigation">
 
-      @for (date of workoutDates; track date) {
+  <div class="date-navigation-header">
+    <span class="date-navigation-label">TRAINING DAYS</span>
+    <span class="date-navigation-count">
+      {{ workoutDates.length }} days
+    </span>
+  </div>
 
-        <button
-          type="button"
-          class="date-tab"
-          [class.active]="selectedDate() === date"
-          (click)="selectDate(date)"
-        >
-          {{ date | date:'dd/MM/yyyy' }}
-        </button>
+  <div class="date-tabs">
 
-      }
+    @for (date of workoutDates; track date) {
 
-    </div>
+      <button
+        type="button"
+        class="date-tab"
+        [class.active]="selectedDate() === date"
+        (click)="selectDate(date)"
+      >
+        <span class="date-day">
+          {{ date | date:'dd' }}
+        </span>
+
+        <span class="date-month">
+          {{ date | date:'MMM' }}
+        </span>
+
+        <span class="date-year">
+          {{ date | date:'yyyy' }}
+        </span>
+
+        <span class="date-workout-count">
+          {{ getWorkoutsForDate(date).length }}
+          {{ getWorkoutsForDate(date).length === 1 ? 'workout' : 'workouts' }}
+        </span>
+      </button>
+
+    }
+
+  </div>
+
+</div>
 
 
     <!-- SELECTED DAY -->
