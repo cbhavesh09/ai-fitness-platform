@@ -51,6 +51,13 @@ def root():
         "message": "API is running for the FastAPI application."
     }
 
+@app.get("/debug-config")
+def debug_config():
+    return {
+        "frontend_url": settings.frontend_url,
+        "mongodb_database": settings.mongodb_database,
+        "jwt_configured": bool(settings.jwt_secret),
+    }
 
 @app.get("/protected")
 async def protected_route(
