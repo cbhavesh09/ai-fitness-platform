@@ -42,7 +42,8 @@ selectDate(date: string): void {
 readonly exerciseSuggestions = signal<string[]>([]);
   readonly recommendation =
     signal<WorkoutRecommendation | null>(null);
-
+readonly showExerciseSuggestions = signal(false);
+readonly filteredExerciseSuggestions = signal<string[]>([]);
   readonly recommendationLoading = signal(false);
   readonly recommendationError = signal('');
 
@@ -70,7 +71,28 @@ loadExerciseSuggestions(): void {
     },
   });
 }
+filterExerciseSuggestions(): void {
+  const query = this.exercise.trim().toLowerCase();
 
+  const suggestions = this.exerciseSuggestions();
+
+  if (!query) {
+    this.filteredExerciseSuggestions.set(
+      suggestions.slice(0, 6),
+    );
+    this.showExerciseSuggestions.set(true);
+    return;
+  }
+
+  const filtered = suggestions
+    .filter((exercise) =>
+      exercise.toLowerCase().includes(query),
+    )
+    .slice(0, 6);
+
+  this.filteredExerciseSuggestions.set(filtered);
+  this.showExerciseSuggestions.set(filtered.length > 0);
+}
   loadWorkouts(): void {
     this.isLoading.set(true);
     this.errorMessage.set('');
@@ -111,6 +133,19 @@ next: (data) => {
       },
     });
   }
+selectExerciseSuggestion(
+  exercise: string,
+): void {
+  this.exercise = exercise;
+  this.showExerciseSuggestions.set(false);
+}
+hideExerciseSuggestions(): void {
+  // Small delay allows a suggestion click to register
+  // before the dropdown disappears.
+  setTimeout(() => {
+    this.showExerciseSuggestions.set(false);
+  }, 150);
+}
 
   loadRecommendation(): void {
     const exerciseName = this.exercise.trim();
