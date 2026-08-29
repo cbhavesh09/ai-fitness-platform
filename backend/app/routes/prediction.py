@@ -13,11 +13,10 @@ from backend.app.schemas.prediction import (
 )
 from backend.app.services.prediction import calculate_calorie_burn
 from backend.app.services.workout_prediction import (
-    get_supported_exercises,
-)
-from backend.app.services.workout_prediction import (
+    get_user_exercises,
     recommend_workout_weight,
 )
+
 
 
 router = APIRouter(
@@ -117,8 +116,9 @@ async def create_workout_weight_prediction(
     user_id: str = Depends(get_current_user),
 ):
     try:
-        result = recommend_workout_weight(
-            request.exercise_name
+        result = await recommend_workout_weight(
+            user_id,
+            request.exercise_name,
         )
 
     except ValueError as exc:
@@ -128,7 +128,6 @@ async def create_workout_weight_prediction(
         )
 
     return result
-
 
 @router.get(
     "",
@@ -164,7 +163,7 @@ async def get_workout_exercises(
     user_id: str = Depends(get_current_user),
 ):
     return {
-        "exercises": get_supported_exercises()
+        "exercises": await get_user_exercises(user_id)
     }
 
 @router.delete(

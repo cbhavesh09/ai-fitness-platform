@@ -15,9 +15,10 @@ export interface Prediction {
 
 export interface WorkoutWeightPrediction {
   exercise: string;
-  recommended_weight: number;
+  recommended_weight: number | null;
   predicted_weight?: number;
-  previous_weight: number;
+  current_weight: number;
+  previous_weight?: number | null;
   recent_best_weight?: number;
   recent_average_weight?: number;
   weight_trend?: number;

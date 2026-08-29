@@ -468,80 +468,125 @@
 
 @if (!isLoading() && workouts().length > 0) {
 
-  <div class="workout-list">
+  <div class="history-layout">
 
-    @for (
-      workout of workouts();
-      track workout.id
-    ) {
+    <!-- DATE TABS -->
+    <div class="date-tabs">
 
-      <article class="workout-card">
-
-        <div class="workout-main">
-
-          <div class="workout-index">
-            {{ $index + 1 }}
-          </div>
-
-          <div class="workout-title">
-
-            <h3>
-              {{ workout.exercise }}
-            </h3>
-
-            <span>
-              {{ workout.muscle_group }}
-            </span>
-
-          </div>
-
-        </div>
-
-
-        <div class="workout-details">
-
-          <div class="workout-stat">
-            <span>Sets</span>
-            <strong>{{ workout.sets }}</strong>
-          </div>
-
-
-          <div class="workout-stat">
-            <span>Reps</span>
-            <strong>{{ workout.reps }}</strong>
-          </div>
-
-
-          <div class="workout-stat">
-            <span>Weight</span>
-            <strong>{{ workout.weight }} kg</strong>
-          </div>
-
-
-          <div class="workout-stat">
-            <span>Duration</span>
-            <strong>{{ workout.duration }} min</strong>
-          </div>
-
-
-          <div class="workout-stat date-stat">
-            <span>Date</span>
-            <strong>{{ workout.date }}</strong>
-          </div>
-
-        </div>
-
+      @for (date of workoutDates; track date) {
 
         <button
           type="button"
-          class="delete-button"
-          (click)="deleteWorkout(workout.id)"
-          aria-label="Delete workout"
+          class="date-tab"
+          [class.active]="selectedDate() === date"
+          (click)="selectDate(date)"
         >
-          Delete
+          {{ date | date:'dd/MM/yyyy' }}
         </button>
 
-      </article>
+      }
+
+    </div>
+
+
+    <!-- SELECTED DAY -->
+    @if (selectedDate(); as activeDate) {
+
+      <div class="selected-day">
+
+        <div class="selected-day-header">
+
+          <div>
+            <span class="eyebrow">TRAINING SESSION</span>
+
+            <h3>
+              {{ activeDate | date:'dd MMMM yyyy' }}
+            </h3>
+          </div>
+
+          <span class="day-count">
+            {{ getWorkoutsForDate(activeDate).length }}
+            workouts
+          </span>
+
+        </div>
+
+
+        <div class="workout-list">
+
+          @for (
+            workout of getWorkoutsForDate(activeDate);
+            track workout.id
+          ) {
+
+            <article class="workout-card">
+
+              <div class="workout-main">
+
+                <div class="workout-index">
+                  {{ $index + 1 }}
+                </div>
+
+                <div class="workout-title">
+
+                  <h3>
+                    {{ workout.exercise }}
+                  </h3>
+
+                  <span>
+                    {{ workout.muscle_group }}
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="workout-details">
+
+                <div class="workout-stat">
+                  <span>Sets</span>
+                  <strong>{{ workout.sets }}</strong>
+                </div>
+
+                <div class="workout-stat">
+                  <span>Reps</span>
+                  <strong>{{ workout.reps }}</strong>
+                </div>
+
+                <div class="workout-stat">
+                  <span>Weight</span>
+                  <strong>
+                    {{ workout.weight }} kg
+                  </strong>
+                </div>
+
+                <div class="workout-stat">
+                  <span>Duration</span>
+                  <strong>
+                    {{ workout.duration }} min
+                  </strong>
+                </div>
+
+              </div>
+
+
+              <button
+                type="button"
+                class="delete-button"
+                (click)="deleteWorkout(workout.id)"
+                aria-label="Delete workout"
+              >
+                Delete
+              </button>
+
+            </article>
+
+          }
+
+        </div>
+
+      </div>
 
     }
 

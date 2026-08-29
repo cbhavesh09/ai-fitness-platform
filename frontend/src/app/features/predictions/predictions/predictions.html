@@ -144,11 +144,52 @@
 
       </select>
 
-      @if (exercises().length === 0) {
-        <span class="selector-hint">
-          Loading available exercises...
-        </span>
+<div class="exercise-control">
+
+  <label for="exercise">
+    Exercise
+  </label>
+
+  @if (exercisesLoading()) {
+
+    <div class="selector-hint">
+      Loading your exercises...
+    </div>
+
+  } @else if (exercises().length === 0) {
+
+    <div class="selector-hint empty-exercises">
+      <strong>No exercises recorded yet.</strong>
+
+      <span>
+        Log a workout first to unlock AI recommendations.
+      </span>
+    </div>
+
+  } @else {
+
+    <select
+      id="exercise"
+      [value]="selectedExercise()"
+      (change)="onExerciseChange($event)"
+    >
+
+      @for (
+        exercise of exercises();
+        track exercise
+      ) {
+
+        <option [value]="exercise">
+          {{ exercise }}
+        </option>
+
       }
+
+    </select>
+
+  }
+
+</div>
 
     </div>
 
@@ -157,10 +198,11 @@
       type="button"
       class="primary-button recommendation-button"
       (click)="generateWorkoutRecommendation()"
-      [disabled]="
-        isWorkoutPredicting() ||
-        exercises().length === 0
-      "
+[disabled]="
+  isWorkoutPredicting() ||
+  exercisesLoading() ||
+  exercises().length === 0
+"
     >
       {{
         isWorkoutPredicting()
@@ -194,15 +236,25 @@
           </div>
 
 
-          <div class="weight-result">
+<div class="weight-result">
 
-            <strong>
-              {{ recommendation.recommended_weight }}
-            </strong>
+  @if (recommendation.recommended_weight !== null) {
 
-            <span>kg</span>
+    <strong>
+      {{ recommendation.recommended_weight }}
+    </strong>
 
-          </div>
+    <span>kg</span>
+
+  } @else {
+
+    <strong>—</strong>
+
+    <span>More data needed</span>
+
+  }
+
+</div>
 
         </div>
 
@@ -211,13 +263,28 @@
 
         <div class="metrics-grid">
 
-          <div class="metric-card">
-            <span>Previous</span>
+<div class="metric-card">
+  <span>Current</span>
 
-            <strong>
-              {{ recommendation.previous_weight }} kg
-            </strong>
-          </div>
+  <strong>
+    {{ recommendation.current_weight }} kg
+  </strong>
+</div>
+
+@if (
+  recommendation.previous_weight !== undefined &&
+  recommendation.previous_weight !== null
+) {
+
+  <div class="metric-card">
+    <span>Previous</span>
+
+    <strong>
+      {{ recommendation.previous_weight }} kg
+    </strong>
+  </div>
+
+}
 
 
           @if (recommendation.predicted_weight !== undefined) {

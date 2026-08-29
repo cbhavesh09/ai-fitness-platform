@@ -1,6 +1,6 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-
+import { DatePipe } from '@angular/common';
 import {
   Workout,
   WorkoutCreate,
@@ -11,7 +11,7 @@ import {
 
 @Component({
   selector: 'app-workouts',
-  imports: [FormsModule],
+  imports: [FormsModule, DatePipe],
   templateUrl: './workouts.html',
   styleUrl: './workouts.css',
 })
@@ -19,6 +19,25 @@ export class Workouts implements OnInit {
   private readonly workoutService = inject(WorkoutService);
 
   readonly workouts = signal<Workout[]>([]);
+readonly selectedDate = signal<string | null>(null);
+
+get workoutDates(): string[] {
+  return [
+    ...new Set(
+      this.workouts().map((workout) => workout.date)
+    ),
+  ];
+}
+
+getWorkoutsForDate(date: string): Workout[] {
+  return this.workouts().filter(
+    (workout) => workout.date === date
+  );
+}
+
+selectDate(date: string): void {
+  this.selectedDate.set(date);
+}
   readonly summary = signal<WorkoutSummary | null>(null);
 
   readonly recommendation =
@@ -49,11 +68,18 @@ export class Workouts implements OnInit {
     this.errorMessage.set('');
 
     this.workoutService.getWorkouts().subscribe({
-      next: (data) => {
-        this.workouts.set(data);
-        this.isLoading.set(false);
-        this.loadSummary();
-      },
+next: (data) => {
+  this.workouts.set(data);
+
+  if (data.length > 0) {
+    this.selectedDate.set(data[0].date);
+  } else {
+    this.selectedDate.set(null);
+  }
+
+  this.isLoading.set(false);
+  this.loadSummary();
+},
       error: (error) => {
         this.isLoading.set(false);
 

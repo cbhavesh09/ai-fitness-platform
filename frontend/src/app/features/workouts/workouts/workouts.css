@@ -1007,4 +1007,76 @@ padding: 17px;
 font-size: 25px;
 }
 
+.history-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.date-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.date-tab {
+  border: 1px solid #d9d9d9;
+  background: #ffffff;
+  padding: 12px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  transition: 0.2s ease;
+}
+
+.date-tab:hover {
+  border-color: #111111;
+}
+
+.date-tab.active {
+  background: #111111;
+  color: #ffffff;
+  border-color: #111111;
+}
+
+.selected-day {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.selected-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.selected-day-header h3 {
+  margin: 6px 0 0;
+}
+
+.day-count {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .selected-day-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .date-tabs {
+    width: 100%;
+  }
+
+  .date-tab {
+    padding: 10px 14px;
+  }
+}
+
 }

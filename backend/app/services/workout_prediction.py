@@ -3,6 +3,8 @@ from pathlib import Path
 import joblib
 import pandas as pd
 
+from backend.app.db.client import database
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
@@ -12,23 +14,8 @@ MODEL_FILE = (
     / "workout_weight_model.joblib"
 )
 
-FEATURE_FILE = (
-    PROJECT_ROOT
-    / "data"
-    / "processed"
-    / "workout_progression_features.csv"
-)
-
-
-FEATURE_COLUMNS = [
+MODEL_FEATURE_COLUMNS = [
     "Exercise Name",
-    "sets",
-    "total_reps",
-    "total_volume",
-    "max_weight",
-    "avg_weight",
-    "best_1rm",
-    "best_reps",
     "previous_weight",
     "previous_volume",
     "previous_reps",
@@ -60,11 +47,14 @@ FEATURE_COLUMNS = [
     "one_rm_trend",
 ]
 
+LB_TO_KG = 0.45359237
+KG_TO_LB = 1 / LB_TO_KG
 
 _model = None
-_features = None
 
-LB_TO_KG = 0.45359237
+
+def kg_to_lb(weight: float) -> float:
+    return weight * KG_TO_LB
 
 
 def lb_to_kg(weight: float) -> float:
@@ -85,277 +75,531 @@ def load_model():
     return _model
 
 
-def load_features() -> pd.DataFrame:
-    global _features
+def calculate_1rm(weight_lb: float, reps: float) -> float:
+    return weight_lb * (1 + reps / 30)
 
-    if _features is None:
-        if not FEATURE_FILE.exists():
-            raise FileNotFoundError(
-                f"Workout feature file not found: {FEATURE_FILE}"
-            )
 
-        df = pd.read_csv(FEATURE_FILE)
+async def load_user_sessions(
+    user_id: str,
+    exercise_name: str,
+) -> pd.DataFrame:
 
-        df["Date"] = pd.to_datetime(df["Date"])
+    cursor = database.workouts.find(
+        {
+            "user_id": user_id,
+            "exercise": exercise_name,
+        }
+    ).sort("date", 1)
 
-        _features = (
-            df.sort_values("Date")
-            .reset_index(drop=True)
+    workouts = []
+
+    async for workout in cursor:
+        workouts.append(
+            {
+                "Date": workout["date"],
+                "Exercise Name": workout["exercise"],
+                "sets": workout["sets"],
+                "reps": workout["reps"],
+                "weight": workout["weight"],
+            }
         )
 
-    return _features
+    if not workouts:
+        return pd.DataFrame()
 
+    df = pd.DataFrame(workouts)
 
-def get_supported_exercises() -> list[str]:
-    df = load_features()
+    df["Date"] = pd.to_datetime(
+        df["Date"],
+        errors="coerce",
+    ).dt.normalize()
 
-    excluded_exercises = {
-        "Chin Up",
-        "Weighted dips",
-    }
-
-    exercises = (
-        df.loc[
-            ~df["Exercise Name"].isin(excluded_exercises),
-            "Exercise Name",
-        ]
-        .dropna()
-        .drop_duplicates()
-        .sort_values()
-        .tolist()
+    df["weight_lb"] = (
+        df["weight"]
+        .astype(float)
+        .apply(kg_to_lb)
     )
 
-    return exercises
+    df["reps"] = df["reps"].astype(float)
+    df["sets"] = df["sets"].astype(float)
 
+    df["total_reps"] = (
+        df["sets"] * df["reps"]
+    )
 
-def round_weight(weight: float) -> float:
-    return round(weight / 5) * 5
+    df["total_volume"] = (
+        df["weight_lb"]
+        * df["reps"]
+        * df["sets"]
+    )
 
+    df["max_weight"] = df["weight_lb"]
 
-def recommend_workout_weight(
-    exercise_name: str,
-) -> dict:
+    df["avg_weight"] = df["weight_lb"]
 
-    df = load_features()
-    model = load_model()
+    df["best_1rm"] = df.apply(
+        lambda row: calculate_1rm(
+            row["weight_lb"],
+            row["reps"],
+        ),
+        axis=1,
+    )
 
-    history = df[
-        df["Exercise Name"] == exercise_name
-    ].copy()
+    df["best_reps"] = df["reps"]
 
-    history = history.sort_values("Date")
-
-    if history.empty:
-        raise ValueError(
-            f"No historical data found for exercise: "
-            f"{exercise_name}"
+    sessions = (
+        df.groupby(
+            ["Date", "Exercise Name"],
+            as_index=False,
         )
+        .agg(
+            sets=("sets", "sum"),
+            total_reps=("total_reps", "sum"),
+            total_volume=("total_volume", "sum"),
+            max_weight=("max_weight", "max"),
+            avg_weight=("avg_weight", "mean"),
+            best_1rm=("best_1rm", "max"),
+            best_reps=("best_reps", "max"),
+        )
+    )
 
-    latest = history.iloc[-1]
+    sessions = (
+        sessions
+        .sort_values("Date")
+        .reset_index(drop=True)
+    )
 
-    previous_weight = float(
+    return sessions
+
+
+def build_next_session_features(
+    sessions: pd.DataFrame,
+) -> pd.Series:
+
+    latest = sessions.iloc[-1]
+
+    previous = (
+        sessions.iloc[-2]
+        if len(sessions) >= 2
+        else None
+    )
+
+    two_ago = (
+        sessions.iloc[-3]
+        if len(sessions) >= 3
+        else None
+    )
+
+    three_ago = (
+        sessions.iloc[-4]
+        if len(sessions) >= 4
+        else None
+    )
+
+    current_weight = float(
         latest["max_weight"]
     )
 
-    sample_count = len(history)
-
-    if sample_count < 10:
-
-        if sample_count < 3:
-
-            recommended = previous_weight
-
-            method = "previous_weight"
-
-            confidence = 0.40
-
-            message = (
-                "Very limited history. Maintain the "
-                "previous usable weight until more "
-                "sessions are recorded."
-            )
-
-        else:
-
-            recent = history.tail(3)
-
-            recommended = float(
-                recent["max_weight"].median()
-            )
-
-            method = "recent_progression"
-
-            confidence = 0.60
-
-            message = (
-                "Limited historical data. "
-                "Recommendation is based on recent "
-                "training performance."
-            )
-
-        return {
-            "exercise": exercise_name,
-
-            "recommended_weight": round(
-                lb_to_kg(recommended),
-                1,
-            ),
-
-            "previous_weight": round(
-                lb_to_kg(previous_weight),
-                1,
-            ),
-
-            "historical_sessions": sample_count,
-
-            "method": method,
-
-            "confidence": confidence,
-
-            "message": message,
-        }
-
-    X = latest[
-        FEATURE_COLUMNS
-    ].to_frame().T
-
-    prediction = float(
-        model.predict(X)[0]
+    current_volume = float(
+        latest["total_volume"]
     )
 
-    prediction = max(
-        0.0,
-        prediction,
+    current_reps = float(
+        latest["total_reps"]
     )
 
-    recent = history.tail(3)
-
-    recent_best = float(
-        recent["max_weight"].max()
+    current_1rm = float(
+        latest["best_1rm"]
     )
 
-    recent_average = float(
+    current_sets = float(
+        latest["sets"]
+    )
+
+    previous_weight = (
+        float(previous["max_weight"])
+        if previous is not None
+        else current_weight
+    )
+
+    previous_volume = (
+        float(previous["total_volume"])
+        if previous is not None
+        else current_volume
+    )
+
+    previous_reps = (
+        float(previous["total_reps"])
+        if previous is not None
+        else current_reps
+    )
+
+    previous_1rm = (
+        float(previous["best_1rm"])
+        if previous is not None
+        else current_1rm
+    )
+
+    previous_sets = (
+        float(previous["sets"])
+        if previous is not None
+        else current_sets
+    )
+
+    weight_2 = (
+        float(two_ago["max_weight"])
+        if two_ago is not None
+        else previous_weight
+    )
+
+    volume_2 = (
+        float(two_ago["total_volume"])
+        if two_ago is not None
+        else previous_volume
+    )
+
+    one_rm_2 = (
+        float(two_ago["best_1rm"])
+        if two_ago is not None
+        else previous_1rm
+    )
+
+    weight_3 = (
+        float(three_ago["max_weight"])
+        if three_ago is not None
+        else weight_2
+    )
+
+    volume_3 = (
+        float(three_ago["total_volume"])
+        if three_ago is not None
+        else volume_2
+    )
+
+    one_rm_3 = (
+        float(three_ago["best_1rm"])
+        if three_ago is not None
+        else one_rm_2
+    )
+
+    days_since_previous = (
+        latest["Date"] - previous["Date"]
+    ).total_seconds() / 86400 \
+        if previous is not None \
+        else 0
+
+    recent = sessions.tail(3)
+
+    rolling_avg_weight = (
         recent["max_weight"].mean()
     )
 
-    trend = float(
-        latest.get("weight_trend", 0)
+    rolling_avg_volume = (
+        recent["total_volume"].mean()
     )
 
-    if trend > 0:
+    rolling_avg_1rm = (
+        recent["best_1rm"].mean()
+    )
 
-        ml_weight = 0.60
-        recent_weight = 0.40
+    rolling_avg_reps = (
+        recent["total_reps"].mean()
+    )
 
-        message = (
-            "Recent performance is trending upward. "
-            "The ML prediction supports progressive loading."
+    recent_best_weight = (
+        recent["max_weight"].max()
+    )
+
+    recent_best_1rm = (
+        recent["best_1rm"].max()
+    )
+
+    return pd.Series(
+        {
+            "Exercise Name": latest["Exercise Name"],
+            "previous_weight": current_weight,
+            "previous_volume": current_volume,
+            "previous_reps": current_reps,
+            "previous_1rm": current_1rm,
+            "previous_sets": current_sets,
+            "weight_2_sessions_ago": previous_weight,
+            "volume_2_sessions_ago": previous_volume,
+            "one_rm_2_sessions_ago": previous_1rm,
+            "weight_3_sessions_ago": weight_2,
+            "volume_3_sessions_ago": volume_2,
+            "one_rm_3_sessions_ago": one_rm_2,
+            "weight_change": current_weight - previous_weight,
+            "volume_change": current_volume - previous_volume,
+            "reps_change": current_reps - previous_reps,
+            "one_rm_change": current_1rm - previous_1rm,
+            "weight_change_2": current_weight - weight_2,
+            "volume_change_2": current_volume - volume_2,
+            "one_rm_change_2": current_1rm - one_rm_2,
+            "days_since_previous": days_since_previous,
+            "previous_session_count": len(sessions),
+            "rolling_avg_weight_3": rolling_avg_weight,
+            "rolling_avg_volume_3": rolling_avg_volume,
+            "rolling_avg_1rm_3": rolling_avg_1rm,
+            "rolling_avg_reps_3": rolling_avg_reps,
+            "recent_best_weight_3": recent_best_weight,
+            "recent_best_1rm_3": recent_best_1rm,
+            "weight_trend": current_weight - weight_3,
+            "volume_trend": current_volume - volume_3,
+            "one_rm_trend": current_1rm - one_rm_3,
+        }
+    )
+
+
+async def get_user_exercises(
+    user_id: str,
+) -> list[str]:
+
+    exercises = await database.workouts.distinct(
+        "exercise",
+        {"user_id": user_id},
+    )
+
+    return sorted(
+        exercise
+        for exercise in exercises
+        if exercise
+    )
+
+
+def round_weight(weight_lb: float) -> float:
+    return round(weight_lb / 5) * 5
+
+
+def calculate_confidence(
+    session_count: int,
+) -> float:
+
+    if session_count < 3:
+        return 0.0
+
+    if session_count == 3:
+        return 0.60
+
+    if session_count == 4:
+        return 0.65
+
+    if session_count == 5:
+        return 0.70
+
+    if session_count == 6:
+        return 0.75
+
+    if session_count == 7:
+        return 0.78
+
+    if session_count >= 8:
+        return 0.80
+
+    return 0.60
+
+
+async def recommend_workout_weight(
+    user_id: str,
+    exercise_name: str,
+) -> dict:
+
+    sessions = await load_user_sessions(
+        user_id,
+        exercise_name,
+    )
+
+    if sessions.empty:
+        raise ValueError(
+            "You have not recorded this exercise yet."
         )
 
-    elif trend < 0:
+    session_count = len(sessions)
 
-        ml_weight = 0.40
-        recent_weight = 0.60
+    latest = sessions.iloc[-1]
+
+    current_weight_lb = float(
+        latest["max_weight"]
+    )
+
+    if session_count < 3:
+        return {
+            "exercise": exercise_name,
+            "recommended_weight": None,
+            "current_weight": round(
+                lb_to_kg(current_weight_lb),
+                1,
+            ),
+            "previous_weight": None,
+            "historical_sessions": session_count,
+            "method": "insufficient_history",
+            "confidence": 0.0,
+            "message": (
+                "Not enough training history for a "
+                "recommendation. Record at least "
+                "3 sessions for this exercise."
+            ),
+        }
+
+    features = build_next_session_features(
+        sessions
+    )
+
+    model = load_model()
+
+    model_input = pd.DataFrame(
+        [
+            {
+                column: features[column]
+                for column in MODEL_FEATURE_COLUMNS
+            }
+        ]
+    )
+
+    prediction_lb = float(
+        model.predict(model_input)[0]
+    )
+
+    prediction_lb = max(
+        0.0,
+        prediction_lb,
+    )
+
+    recent = sessions.tail(3)
+
+    recent_average_lb = float(
+        recent["max_weight"].mean()
+    )
+
+    recent_best_lb = float(
+        recent["max_weight"].max()
+    )
+
+    previous_weight_lb = (
+        float(sessions.iloc[-2]["max_weight"])
+    )
+
+    progression = (
+        current_weight_lb
+        - previous_weight_lb
+    )
+
+    if progression > 0:
+        ml_weight = 0.45
+        recent_weight = 0.25
+        progression_weight = 0.30
 
         message = (
-            "Recent performance is declining. "
+            "Your recent performance is improving. "
+            "The recommendation combines the ML prediction "
+            "with your recent progression."
+        )
+
+    elif progression < 0:
+        ml_weight = 0.35
+        recent_weight = 0.45
+        progression_weight = 0.20
+
+        message = (
+            "Your recent performance has declined. "
             "The recommendation gives more weight to "
-            "recent training performance."
+            "your recent training performance."
         )
 
     else:
-
-        ml_weight = 0.50
-        recent_weight = 0.50
+        ml_weight = 0.45
+        recent_weight = 0.45
+        progression_weight = 0.10
 
         message = (
-            "Recent performance is relatively stable. "
+            "Your recent performance is stable. "
             "The recommendation combines the ML prediction "
             "with recent training performance."
         )
 
-    blended = (
-        prediction * ml_weight
-        + recent_average * recent_weight
+    progression_target_lb = (
+        current_weight_lb
+        + max(0.0, progression)
     )
 
-    lower_bound = min(
-        recent_best,
-        previous_weight,
+    blended_lb = (
+        prediction_lb * ml_weight
+        + recent_average_lb * recent_weight
+        + progression_target_lb * progression_weight
     )
 
-    upper_bound = max(
-        recent_best,
-        previous_weight,
+    minimum_lb = current_weight_lb
+
+    maximum_progression_lb = (
+        current_weight_lb + 10
     )
 
-    upper_bound += 5
-
-    if blended < lower_bound:
-
-        blended = lower_bound
+    if blended_lb < minimum_lb:
+        recommended_lb = minimum_lb
 
         safety_adjustment = (
-            "recommendation raised to recent historical range"
+            "Recommendation kept at the current "
+            "working weight because the model predicted "
+            "a lower value."
         )
 
-    elif blended > upper_bound:
-
-        blended = upper_bound
+    elif blended_lb > maximum_progression_lb:
+        recommended_lb = maximum_progression_lb
 
         safety_adjustment = (
-            "recommendation capped at a conservative "
-            "historical progression limit"
+            "Recommendation capped at a conservative "
+            "10 lb progression from the current weight."
         )
 
     else:
+        recommended_lb = blended_lb
 
         safety_adjustment = (
-            "prediction within historical bounds"
+            "Recommendation is within a conservative "
+            "progression range."
         )
 
-    recommended = round_weight(blended)
+    recommended_lb = round_weight(
+        recommended_lb
+    )
+
+    recommended_kg = round(
+        lb_to_kg(recommended_lb) / 2.5
+    ) * 2.5
 
     return {
         "exercise": exercise_name,
-
-        "recommended_weight": round(
-            lb_to_kg(recommended),
-            1,
-        ),
-
+        "recommended_weight": recommended_kg,
         "predicted_weight": round(
-            lb_to_kg(prediction),
+            lb_to_kg(prediction_lb),
             1,
         ),
-
+        "current_weight": round(
+            lb_to_kg(current_weight_lb),
+            1,
+        ),
         "previous_weight": round(
-            lb_to_kg(previous_weight),
+            lb_to_kg(previous_weight_lb),
             1,
         ),
-
         "recent_best_weight": round(
-            lb_to_kg(recent_best),
+            lb_to_kg(recent_best_lb),
             1,
         ),
-
         "recent_average_weight": round(
-            lb_to_kg(recent_average),
+            lb_to_kg(recent_average_lb),
             1,
         ),
-
         "weight_trend": round(
-            lb_to_kg(trend),
+            lb_to_kg(
+                float(features["weight_trend"])
+            ),
             1,
         ),
-
-        "historical_sessions": sample_count,
-
-        "method": "random_forest_blended",
-
-        "confidence": 0.90,
-
+        "historical_sessions": session_count,
+        "method": "random_forest_progression",
+        "confidence": calculate_confidence(
+            session_count
+        ),
         "message": message,
-
         "safety_adjustment": safety_adjustment,
     }
