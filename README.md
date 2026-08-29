@@ -17,7 +17,6 @@ Most beginner ML projects stop at "train a model, print the accuracy." I wanted 
 ## Features
 
 ### Authentication
-
 - User registration and login
 - JWT-based authentication
 - Password hashing with Argon2
@@ -25,9 +24,7 @@ Most beginner ML projects stop at "train a model, print the accuracy." I wanted 
 - User-specific workout and prediction data
 
 ### Workout Tracking
-
 Users can log individual workouts with:
-
 - Exercise
 - Muscle group
 - Sets
@@ -39,19 +36,16 @@ Users can log individual workouts with:
 The workout history can be viewed by training date, and individual workouts can be deleted.
 
 ### Exercise Suggestions
-
 The workout form provides suggestions based on exercises already recorded by the user.
 
 This is not a fixed list. When a user records a new exercise, it can become part of their future suggestions.
 
 ### Workout Weight Recommendations
-
 The main ML feature of the application is the workout weight recommendation.
 
 After selecting an exercise, the system uses the user's previous training history to estimate a suitable working weight for the next session.
 
 The recommendation shows information such as:
-
 - Current weight
 - Previous weight
 - ML prediction
@@ -63,27 +57,43 @@ The recommendation shows information such as:
 The final recommendation also goes through additional progression and safety checks before being returned.
 
 ### Calorie Predictions
-
 Users can generate a calorie-burn prediction based on their fitness information.
 
 Generated predictions are saved so that previous predictions can be viewed later.
 
 ### Weight Tracking
-
 Users can record their body weight and view their weight history over time.
 
 ### Responsive Interface
-
 The application works across desktop and mobile screen sizes.
 
 On smaller screens, the desktop sidebar is replaced with a navigation drawer to make the application easier to use on mobile devices.
+
+## Screenshots
+
+### Dashboard
+![Dashboard](docs/screenshots/dashboard.png)
+
+### Workouts
+![Workouts](docs/screenshots/workouts.png)
+
+### Weight Tracking
+![Weight Tracking](docs/screenshots/weights.png)
+
+### Calorie Tracking
+![Calorie Tracking](docs/screenshots/calories.png)
+
+### AI Predictions
+![AI Predictions](docs/screenshots/predictions.png)
+
+### Mobile View
+![Mobile View](docs/screenshots/mobile.png)
 
 ## The ML side
 
 The recommendation model is a `RandomForestRegressor` (scikit-learn), trained offline and loaded via Joblib at request time — the backend doesn't retrain on the fly.
 
 **Features (30 total)**, engineered from workout history rather than raw logs:
-
 - Previous weight, volume, reps, and estimated 1RM
 - Session-over-session deltas (weight, volume, reps, 1RM)
 - Days since last session, session count
@@ -91,7 +101,6 @@ The recommendation model is a `RandomForestRegressor` (scikit-learn), trained of
 - Weight / volume / 1RM trend
 
 **Pipeline:**
-
 ```
 Workout History → Preprocessing → Feature Engineering
    → Random Forest Model → Predicted Weight
@@ -122,13 +131,13 @@ Workout History → Preprocessing → Feature Engineering
 
 ## Tech stack
 
-| Layer    | Tech                                               |
-| -------- | -------------------------------------------------- |
+| Layer | Tech |
+|---|---|
 | Frontend | Angular 22, TypeScript, Angular Router/Forms, RxJS |
-| Backend  | Python 3.12, FastAPI, Uvicorn, Pydantic, PyMongo   |
-| Database | MongoDB                                            |
-| Auth     | JWT (PyJWT), Argon2                                |
-| ML       | Pandas, scikit-learn, Joblib                       |
+| Backend | Python 3.12, FastAPI, Uvicorn, Pydantic, PyMongo |
+| Database | MongoDB |
+| Auth | JWT (PyJWT), Argon2 |
+| ML | Pandas, scikit-learn, Joblib |
 
 ## Project Structure
 
@@ -202,19 +211,16 @@ cd ai-fitness-platform
 ### Backend Setup
 
 Create a Python virtual environment:
-
 ```bash
 python -m venv venv
 ```
 
 Activate the virtual environment on Windows:
-
 ```bash
 .\venv\Scripts\Activate.ps1
 ```
 
 Install the required Python packages:
-
 ```bash
 pip install -r backend\requirements.txt
 ```
@@ -222,7 +228,6 @@ pip install -r backend\requirements.txt
 #### Environment Variables
 
 Create a `.env` file in the project root. The repository includes `.env.example` as a template:
-
 ```
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DATABASE=ai_fitness
@@ -236,7 +241,6 @@ Update these values if you are using a different MongoDB setup. For example, `MO
 #### Run the Backend
 
 From the project root:
-
 ```bash
 uvicorn backend.app.main:app --reload
 ```
@@ -246,19 +250,16 @@ The backend will normally be available at `http://127.0.0.1:8000`.
 ### Frontend Setup
 
 Open another terminal and move into the frontend directory:
-
 ```bash
 cd frontend
 ```
 
 Install the frontend dependencies:
-
 ```bash
 npm install
 ```
 
 Start the Angular development server:
-
 ```bash
 npm start
 ```
@@ -268,7 +269,6 @@ The frontend will normally be available at `http://localhost:4200`.
 #### Production Build
 
 To create a production build of the Angular application:
-
 ```bash
 npm run build
 ```
