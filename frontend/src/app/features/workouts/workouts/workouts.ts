@@ -138,6 +138,7 @@ selectExerciseSuggestion(
 ): void {
   this.exercise = exercise;
   this.showExerciseSuggestions.set(false);
+  this.loadRecommendation();
 }
 hideExerciseSuggestions(): void {
   // Small delay allows a suggestion click to register

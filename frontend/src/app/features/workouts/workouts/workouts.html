@@ -145,17 +145,17 @@
 
           <div class="exercise-input-wrapper">
 
-            <input
-              id="exercise"
-              name="exercise"
-              type="text"
-              [(ngModel)]="exercise"
-              (input)="filterExerciseSuggestions()"
-              (focus)="filterExerciseSuggestions()"
-              (blur)="hideExerciseSuggestions()"
-              placeholder="e.g. Bench Press"
-              autocomplete="off"
-            />
+<input
+  id="exercise"
+  name="exercise"
+  type="text"
+  [(ngModel)]="exercise"
+  (input)="filterExerciseSuggestions()"
+  (focus)="filterExerciseSuggestions()"
+  (blur)="loadRecommendation(); hideExerciseSuggestions()"
+  placeholder="e.g. Bench Press"
+  autocomplete="off"
+/>
 
 
             @if (showExerciseSuggestions()) {
