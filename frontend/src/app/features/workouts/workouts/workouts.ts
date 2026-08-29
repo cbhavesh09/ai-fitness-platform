@@ -39,7 +39,7 @@ selectDate(date: string): void {
   this.selectedDate.set(date);
 }
   readonly summary = signal<WorkoutSummary | null>(null);
-
+readonly exerciseSuggestions = signal<string[]>([]);
   readonly recommendation =
     signal<WorkoutRecommendation | null>(null);
 
@@ -59,9 +59,17 @@ selectDate(date: string): void {
 
   isSaving = false;
 
-  ngOnInit(): void {
-    this.loadWorkouts();
-  }
+ngOnInit(): void {
+  this.loadWorkouts();
+  this.loadExerciseSuggestions();
+}
+loadExerciseSuggestions(): void {
+  this.workoutService.getExerciseSuggestions().subscribe({
+    next: (data) => {
+      this.exerciseSuggestions.set(data.exercises);
+    },
+  });
+}
 
   loadWorkouts(): void {
     this.isLoading.set(true);

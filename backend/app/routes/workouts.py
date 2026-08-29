@@ -7,7 +7,24 @@ from backend.app.schemas.workout import WorkoutCreate, WorkoutResponse
 from backend.app.schemas.workout_summary import WorkoutSummary
 
 router = APIRouter(prefix="/workouts", tags=["Workouts"])
+def normalize_exercise_name(name: str) -> str:
+    normalized = " ".join(name.strip().split())
 
+    alias = EXERCISE_ALIASES.get(
+        normalized.lower()
+    )
+
+    if alias:
+        return alias
+
+    return normalized
+EXERCISE_ALIASES = {
+    "squat": "Squat (Barbell)",
+    "squats": "Squat (Barbell)",
+    "bench press": "Bench Press (Barbell)",
+    "bench press barbell": "Bench Press (Barbell)",
+    "deadlift": "Deadlift (Barbell)",
+}
 
 @router.post(
     "",
@@ -20,7 +37,9 @@ async def create_workout(
 ):
     workout = Workout(
         user_id=user_id,
-        exercise=workout_data.exercise,
+        exercise=normalize_exercise_name(
+    workout_data.exercise
+),
         muscle_group=workout_data.muscle_group,
         sets=workout_data.sets,
         reps=workout_data.reps,
@@ -124,6 +143,44 @@ async def get_workout_summary(
 
 
 from bson import ObjectId
+
+@router.get(
+    "/exercise-suggestions",
+)
+async def get_exercise_suggestions(
+    user_id: str = Depends(get_current_user),
+):
+    exercises = await database.workouts.distinct(
+        "exercise"
+    )
+
+    seed_exercises = [
+        "Bench Press (Barbell)",
+        "Incline Bench Press (Barbell)",
+        "Squat (Barbell)",
+        "Deadlift (Barbell)",
+        "Romanian Deadlift (Barbell)",
+        "Overhead Press (Barbell)",
+        "Lat Pulldown",
+        "Seated Cable Row",
+        "Bicep Curl (Barbell)",
+        "Bicep Curl (Dumbbell)",
+        "Hammer Curl (Dumbbell)",
+        "Tricep Pushdown",
+        "Lateral Raise (Dumbbells)",
+        "Leg Press",
+        "Leg Extension",
+        "Leg Curl",
+        "Pull Up",
+        "Push Up",
+    ]
+
+    all_exercises = set(seed_exercises)
+    all_exercises.update(exercises)
+
+    return {
+        "exercises": sorted(all_exercises)
+    }
 
 @router.delete(
     "/{workout_id}",

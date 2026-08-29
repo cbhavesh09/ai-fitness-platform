@@ -116,14 +116,24 @@
         Exercise
       </label>
 
-      <input
-        id="exercise"
-        name="exercise"
-        type="text"
-        [(ngModel)]="exercise"
-        (blur)="loadRecommendation()"
-        placeholder="e.g. Bench Press"
-      />
+<input
+  id="exercise"
+  name="exercise"
+  type="text"
+  [(ngModel)]="exercise"
+  (blur)="loadRecommendation()"
+  list="exercise-suggestions"
+  placeholder="e.g. Bench Press"
+/>
+
+<datalist id="exercise-suggestions">
+  @for (
+    suggestion of exerciseSuggestions();
+    track suggestion
+  ) {
+    <option [value]="suggestion"></option>
+  }
+</datalist>
 
     </div>
 

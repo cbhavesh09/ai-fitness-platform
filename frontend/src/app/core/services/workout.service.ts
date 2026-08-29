@@ -44,6 +44,10 @@ export interface WorkoutSummary {
   today_workouts: number;
 }
 
+export interface ExerciseSuggestionsResponse {
+  exercises: string[];
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -56,6 +60,11 @@ export class WorkoutService {
   getWorkouts(): Observable<Workout[]> {
     return this.http.get<Workout[]>(this.workoutsUrl);
   }
+getExerciseSuggestions(): Observable<ExerciseSuggestionsResponse> {
+  return this.http.get<ExerciseSuggestionsResponse>(
+    `${this.workoutsUrl}/exercise-suggestions`,
+  );
+}
 
   createWorkout(workout: WorkoutCreate): Observable<Workout> {
     return this.http.post<Workout>(this.workoutsUrl, workout);
