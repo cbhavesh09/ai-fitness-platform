@@ -17,6 +17,7 @@ Most beginner ML projects stop at "train a model, print the accuracy." I wanted 
 ## Features
 
 ### Authentication
+
 - User registration and login
 - JWT-based authentication
 - Password hashing with Argon2
@@ -24,7 +25,9 @@ Most beginner ML projects stop at "train a model, print the accuracy." I wanted 
 - User-specific workout and prediction data
 
 ### Workout Tracking
+
 Users can log individual workouts with:
+
 - Exercise
 - Muscle group
 - Sets
@@ -36,76 +39,54 @@ Users can log individual workouts with:
 The workout history can be viewed by training date, and individual workouts can be deleted.
 
 ### Exercise Suggestions
+
 The workout form provides suggestions based on exercises already recorded by the user.
 
 This is not a fixed list. When a user records a new exercise, it can become part of their future suggestions.
 
 ### Workout Weight Recommendations
+
 The main ML feature of the application is the workout weight recommendation.
 
 After selecting an exercise, the system uses the user's previous training history to estimate a suitable working weight for the next session.
 
 The recommendation shows information such as:
+
 - Current weight
 - Previous weight
 - ML prediction
 - Recent best weight
 - Recent average weight
-- Model confidence
+- History sufficiency
 - Number of historical sessions
 
-The final recommendation also goes through additional progression and safety checks before being returned.
+The final recommendation also goes through a historical blending and weight-bounding policy before being returned.
 
 ### Calorie Predictions
-Users can generate a calorie-burn prediction based on their fitness information.
+
+Users can generate a formula-based calorie-burn estimate from their fitness information.
 
 Generated predictions are saved so that previous predictions can be viewed later.
 
 ### Weight Tracking
+
 Users can record their body weight and view their weight history over time.
 
 ### Responsive Interface
+
 The application works across desktop and mobile screen sizes.
 
 On smaller screens, the desktop sidebar is replaced with a navigation drawer to make the application easier to use on mobile devices.
 
-## Screenshots
+## Workout progression model
 
-### Dashboard
-![Dashboard](docs/screenshots/dashboard.png)
+The offline Random Forest predicts the next exercise session's maximum recorded working weight. Both training and FastAPI inference use the same 30 ordered features, built from at least three completed exercise dates. Each exercise has one session per UTC calendar date. Training records use pounds. The API converts logged kilograms to pounds before aggregation and returns recommendations in kilograms.
 
-### Workouts
-![Workouts](docs/screenshots/workouts.png)
+The original pipeline used the target session to calculate seven change features. Splitting observations chronologically still left target-derived values inside each row. The corrected pipeline constructs each row from the strictly earlier sessions and holds out complete calendar dates. The workout history-sufficiency score is a session-count heuristic. Existing API clients can still read the same value through the legacy `confidence` field.
 
-### Weight Tracking
-![Weight Tracking](docs/screenshots/weights.png)
+The dataset produced 1,535 supervised rows. On 231 held-out observations, MAE was 18.77 lb for persistence, 18.07 lb for the recent-three-session mean, 19.10 lb for Linear Regression, and 19.16 lb for Random Forest. Random Forest MAE was 2.09% higher than persistence. Applying the production recommendation policy yielded 18.48 lb MAE. These results measure agreement with one apparent athlete's historical working weights.
 
-### Calorie Tracking
-![Calorie Tracking](docs/screenshots/calories.png)
-
-### AI Predictions
-![AI Predictions](docs/screenshots/predictions.png)
-
-### Mobile View
-![Mobile View](docs/screenshots/mobile.png)
-
-## The ML side
-
-The recommendation model is a `RandomForestRegressor` (scikit-learn), trained offline and loaded via Joblib at request time — the backend doesn't retrain on the fly.
-
-**Features (30 total)**, engineered from workout history rather than raw logs:
-- Previous weight, volume, reps, and estimated 1RM
-- Session-over-session deltas (weight, volume, reps, 1RM)
-- Days since last session, session count
-- Rolling averages and recent bests (weight, 1RM)
-- Weight / volume / 1RM trend
-
-**Pipeline:**
-```
-Workout History → Preprocessing → Feature Engineering
-   → Random Forest Model → Predicted Weight
-   → Progression & Safety Checks → Final Recommendation
-```
+See [the ML implementation report](docs/ml-progression-report.md) for the exact feature definitions, data limitations, comparison metrics, and reproduction commands.
 
 ## Architecture
 
@@ -131,13 +112,13 @@ Workout History → Preprocessing → Feature Engineering
 
 ## Tech stack
 
-| Layer | Tech |
-|---|---|
+| Layer    | Tech                                               |
+| -------- | -------------------------------------------------- |
 | Frontend | Angular 22, TypeScript, Angular Router/Forms, RxJS |
-| Backend | Python 3.12, FastAPI, Uvicorn, Pydantic, PyMongo |
-| Database | MongoDB |
-| Auth | JWT (PyJWT), Argon2 |
-| ML | Pandas, scikit-learn, Joblib |
+| Backend  | Python 3.12, FastAPI, Uvicorn, Pydantic, PyMongo   |
+| Database | MongoDB                                            |
+| Auth     | JWT (PyJWT), Argon2                                |
+| ML       | Pandas, scikit-learn, Joblib                       |
 
 ## Project Structure
 
@@ -211,16 +192,19 @@ cd ai-fitness-platform
 ### Backend Setup
 
 Create a Python virtual environment:
+
 ```bash
 python -m venv venv
 ```
 
 Activate the virtual environment on Windows:
+
 ```bash
 .\venv\Scripts\Activate.ps1
 ```
 
 Install the required Python packages:
+
 ```bash
 pip install -r backend\requirements.txt
 ```
@@ -228,6 +212,7 @@ pip install -r backend\requirements.txt
 #### Environment Variables
 
 Create a `.env` file in the project root. The repository includes `.env.example` as a template:
+
 ```
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DATABASE=ai_fitness
@@ -241,6 +226,7 @@ Update these values if you are using a different MongoDB setup. For example, `MO
 #### Run the Backend
 
 From the project root:
+
 ```bash
 uvicorn backend.app.main:app --reload
 ```
@@ -250,16 +236,19 @@ The backend will normally be available at `http://127.0.0.1:8000`.
 ### Frontend Setup
 
 Open another terminal and move into the frontend directory:
+
 ```bash
 cd frontend
 ```
 
 Install the frontend dependencies:
+
 ```bash
 npm install
 ```
 
 Start the Angular development server:
+
 ```bash
 npm start
 ```
@@ -269,6 +258,7 @@ The frontend will normally be available at `http://localhost:4200`.
 #### Production Build
 
 To create a production build of the Angular application:
+
 ```bash
 npm run build
 ```
@@ -313,7 +303,7 @@ Some features I would like to explore in future versions include:
 
 - Improving exercise name normalization and handling variations in exercise names
 - Adding more detailed progress charts and long-term training analytics
-- Improving the calorie prediction model with additional activity data
+- Improving the calorie estimation formula with additional activity data
 - Exploring additional machine learning models for comparison
 - Expanding the workout recommendation system to suggest complete training programs
 - Adding more detailed nutrition tracking
