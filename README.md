@@ -57,14 +57,14 @@ The recommendation shows information such as:
 - ML prediction
 - Recent best weight
 - Recent average weight
-- Model confidence
+- History sufficiency
 - Number of historical sessions
 
-The final recommendation also goes through additional progression and safety checks before being returned.
+The final recommendation also goes through a historical blending and weight-bounding policy before being returned.
 
 ### Calorie Predictions
 
-Users can generate a calorie-burn prediction based on their fitness information.
+Users can generate a formula-based calorie-burn estimate from their fitness information.
 
 Generated predictions are saved so that previous predictions can be viewed later.
 
@@ -78,25 +78,15 @@ The application works across desktop and mobile screen sizes.
 
 On smaller screens, the desktop sidebar is replaced with a navigation drawer to make the application easier to use on mobile devices.
 
-## The ML side
+## Workout progression model
 
-The recommendation model is a `RandomForestRegressor` (scikit-learn), trained offline and loaded via Joblib at request time — the backend doesn't retrain on the fly.
+The offline Random Forest predicts the next exercise session's maximum recorded working weight. Both training and FastAPI inference use the same 30 ordered features, built from at least three completed exercise dates. Each exercise has one session per UTC calendar date. Training records use pounds. The API converts logged kilograms to pounds before aggregation and returns recommendations in kilograms.
 
-**Features (30 total)**, engineered from workout history rather than raw logs:
+The original pipeline used the target session to calculate seven change features. Splitting observations chronologically still left target-derived values inside each row. The corrected pipeline constructs each row from the strictly earlier sessions and holds out complete calendar dates. The workout history-sufficiency score is a session-count heuristic. Existing API clients can still read the same value through the legacy `confidence` field.
 
-- Previous weight, volume, reps, and estimated 1RM
-- Session-over-session deltas (weight, volume, reps, 1RM)
-- Days since last session, session count
-- Rolling averages and recent bests (weight, 1RM)
-- Weight / volume / 1RM trend
+The dataset produced 1,535 supervised rows. On 231 held-out observations, MAE was 18.77 lb for persistence, 18.07 lb for the recent-three-session mean, 19.10 lb for Linear Regression, and 19.16 lb for Random Forest. Random Forest MAE was 2.09% higher than persistence. Applying the production recommendation policy yielded 18.48 lb MAE. These results measure agreement with one apparent athlete's historical working weights.
 
-**Pipeline:**
-
-```
-Workout History → Preprocessing → Feature Engineering
-   → Random Forest Model → Predicted Weight
-   → Progression & Safety Checks → Final Recommendation
-```
+See [the ML implementation report](docs/ml-progression-report.md) for the exact feature definitions, data limitations, comparison metrics, and reproduction commands.
 
 ## Architecture
 
@@ -313,7 +303,7 @@ Some features I would like to explore in future versions include:
 
 - Improving exercise name normalization and handling variations in exercise names
 - Adding more detailed progress charts and long-term training analytics
-- Improving the calorie prediction model with additional activity data
+- Improving the calorie estimation formula with additional activity data
 - Exploring additional machine learning models for comparison
 - Expanding the workout recommendation system to suggest complete training programs
 - Adding more detailed nutrition tracking

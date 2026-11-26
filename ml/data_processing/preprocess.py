@@ -2,31 +2,14 @@ from pathlib import Path
 
 import pandas as pd
 
+from ml.progression_features import normalize_exercise_name
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 INPUT_FILE = PROJECT_ROOT / "data" / "weightlifting_721_workouts.csv"
 OUTPUT_DIR = PROJECT_ROOT / "data" / "processed"
 OUTPUT_FILE = OUTPUT_DIR / "weightlifting_clean.csv"
-
-
-EXERCISE_ALIASES = {
-    "Incline Bench Press": "Incline Bench Press (Barbell)",
-    "Squat": "Squat (Barbell)",
-    "Seated Row": "Seated Cable Row (close Grip)",
-    "Good Morning": "Good Morning (Barbell)",
-    "Bicep Curl (barbell )": "Bicep Curl (Barbell)",
-    "Lateral Raise": "Lateral Raise (Dumbbells)",
-    "Hammer Curl": "Hammer Curl (Dumbbell )",
-    "Leg press": "Leg press (hinge )",
-}
-
-
-def normalize_exercise_name(name: str) -> str:
-    name = str(name).strip()
-    name = " ".join(name.split())
-
-    return EXERCISE_ALIASES.get(name, name)
 
 
 def main() -> None:
